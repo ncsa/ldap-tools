@@ -1,0 +1,66 @@
+#!/usr/bin/bash
+
+INSTALL_DIR='___INSTALL_DIR___'
+. "${INSTALL_DIR}"/ds_lib.sh
+
+install_pkgs() {
+
+  local _repos=(
+    https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
+  )
+  local _pkgs=(
+    389-ds-base 
+    certbot
+  )
+
+  if [[ "${PAM_AUTH}" -eq $YES ]] ; then
+    _pkgs+=(
+      pam_krb5.x86_64
+    )
+  fi
+
+  #install repos
+  dnf -y install "${_repos[@]}"
+
+  #install packages
+  dnf -y install "${_pkgs[@]}"
+
+}
+
+
+mk_ldap_inf() {
+  [[ -f "${SERVER_INF}" ]] \
+  || cat <<ENDHERE >"${SERVER_INF}"
+[general]
+[slapd]
+instance_name = ${INSTANCE_NAME}
+root_password = ${DNPW}
+self_sign_cert = False
+[backend-userroot]
+create_suffix_entry = True
+suffix = dc=ncsa,dc=illinois,dc=edu
+ENDHERE
+}
+
+
+install_ldap_server() {
+  /usr/sbin/dscreate from-file "${SERVER_INF}"
+}
+
+
+get_status() {
+  _dsctl status
+}
+
+
+###
+# MAIN
+###
+
+mk_ldap_inf
+
+install_pkgs
+
+install_ldap_server
+
+get_status
