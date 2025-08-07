@@ -45,11 +45,11 @@ set_install_dir() {
 
 install_files() {
   install \
-    -d "${INSTALL_DIR}" \
     -D \
     --compare \
     --verbose \
     --suffix="${TS}" \
+    -d "${INSTALL_DIR}" \
     "${BASE}"/bin/*.sh
 }
 
