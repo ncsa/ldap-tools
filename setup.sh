@@ -49,7 +49,7 @@ install_files() {
     --compare \
     --verbose \
     --suffix="${TS}" \
-    -d "${INSTALL_DIR}" \
+    -t "${INSTALL_DIR}" \
     "${BASE}"/bin/*.sh
 }
 
