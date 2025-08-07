@@ -1,8 +1,7 @@
-# See also:
-# https://docs.redhat.com/en/documentation/red_hat_directory_server/12/pdf/securing_red_hat_directory_server/Red_Hat_Directory_Server-12-Securing_Red_Hat_Directory_Server-en-US.pdf
+#!/usr/bin/bash
 
-. ds_lib.sh #defines vars and functions
-
+INSTALL_DIR='__INSTALL_DIR__'
+. "${INSTALL_DIR}"/ds_lib.sh
 
 # If you created the private key using an external utility,
 # import the server certificate and the private key:

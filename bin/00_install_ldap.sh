@@ -1,6 +1,7 @@
-#See also: https://wiki.ncsa.illinois.edu/display/ICI/Migration+Plan+NCSA+LDAP
+#!/usr/bin/bash
 
-. ds_lib.sh
+INSTALL_DIR='__INSTALL_DIR__'
+. "${INSTALL_DIR}"/ds_lib.sh
 
 install_pkgs() {
 
@@ -28,8 +29,8 @@ install_pkgs() {
 
 
 mk_ldap_inf() {
-  local _passwd=$( cat "${DNPW_FN}" )
-  cat <<ENDHERE >"${SERVER_INF}"
+  [[ -f "${SERVER_INF}" ]] \
+  || cat <<ENDHERE >"${SERVER_INF}"
 [general]
 [slapd]
 instance_name = ${INSTANCE_NAME}

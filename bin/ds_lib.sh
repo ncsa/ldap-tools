@@ -1,16 +1,14 @@
-# See also:
-# https://docs.redhat.com/en/documentation/red_hat_directory_server/12/pdf/securing_red_hat_directory_server/Red_Hat_Directory_Server-12-Securing_Red_Hat_Directory_Server-en-US.pdf
-
+INSTALL_DIR='__INSTALL_DIR__'
 YES=0
 NO=1
+
 PAM_AUTH=$NO
 INSTANCE_NAME=ncsa-test-ldap
 
-BASE=/root/ldap
 EMAIL=ldap-admin@lists.ncsa.illinois.edu
 
-SERVER_INF="${BASE}"/"${INSTANCE_NAME}".inf
-DNPW_FN="${BASE}"/dnpw
+SERVER_INF="${INSTALL_DIR}"/"${INSTANCE_NAME}".inf
+DNPW_FN="${INSTALL_DIR}"/dnpw
 #DNPW=$( cat "${DNPW_FN}" ) now at end of file, comment remains as reminder
 HOST=$( hostname -f )
 LETSENCRYPT_BASE=/etc/letsencrypt

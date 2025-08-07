@@ -1,5 +1,7 @@
+#!/usr/bin/bash
 
-. ds_lib.sh
+INSTALL_DIR='__INSTALL_DIR__'
+. "${INSTALL_DIR}"/ds_lib.sh
 
 HOOK_DIR="${LETSENCRYPT_BASE}"/renewal-hooks
 PRE_DIR="${HOOK_DIR}"/pre
