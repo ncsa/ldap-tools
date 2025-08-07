@@ -29,3 +29,5 @@ get_cert() {
 ###
 
 get_base
+
+get_cert
