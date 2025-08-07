@@ -49,7 +49,7 @@ install_files() {
     --compare \
     --verbose \
     --suffix="${TS}" \
-    bin/*.sh
+    $(ls bin/*.sh )
 }
 
 
