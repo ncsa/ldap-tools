@@ -27,6 +27,11 @@ import_ca_cert() {
     --flags "CT,,"
 }
 
+
+###
+# MAIN
+###
+
 import_server_cert
 
 import_ca_cert

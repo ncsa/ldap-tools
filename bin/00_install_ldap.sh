@@ -42,6 +42,17 @@ suffix = dc=ncsa,dc=illinois,dc=edu
 ENDHERE
 }
 
+
+install_ldap_server() {
+  /usr/sbin/dscreate from-file "${SERVER_INF}"
+}
+
+
+get_status() {
+  _dsctl status
+}
+
+
 ###
 # MAIN
 ###
@@ -49,3 +60,7 @@ ENDHERE
 mk_ldap_inf
 
 install_pkgs
+
+install_ldap_server
+
+get_status

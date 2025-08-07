@@ -20,7 +20,7 @@ set_nss_stuff() {
   set -x
   _dsconf \
     security rsa set \
-    --tlsallow-rsa-certificates on \
+    --tls-allow-rsa-certificates on \
     --nss-token "internal (software)" \
     --nss-cert-name "${NICKNAME}"
 }

@@ -59,6 +59,7 @@ set_email() {
   echo
   echo "Set email"
   /usr/bin/certbot \
+    register \
     --email "${EMAIL}" \
     --no-eff-email \
     --agree-tos
