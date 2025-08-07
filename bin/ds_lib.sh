@@ -46,6 +46,20 @@ _ldapsearch() {
 }
 
 
+dump_config() {
+  _ldapsearch \
+    -LLx \
+    -b 'cn=config'
+}
+
+
+get_replication_config() {
+  _ldapsearch \
+    -LLx \
+    -b 'cn=mapping tree,cn=config'
+}
+
+
 mk_passwd() {
   tr -dc A-Za-z0-9 </dev/urandom | head -c 13
 }

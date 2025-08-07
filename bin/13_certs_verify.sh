@@ -14,17 +14,13 @@ get_base() {
 }
 
 
-get_config() {
-  _ldapsearch \
-    -LLx \
-    -b "cn=config"
-}
+get_cert() {
+  echo \
+  | openssl s_client \
+      -servername "${HOST}" \
+      -connect "${HOST}":636 2>/dev/null \
+  | openssl x509 -noout -subject -issuer -dates
 
-
-get_replication() {
-  _ldapsearch \
-    -LLx \
-    -b "cn=mapping tree,cn=config"
 }
 
 
@@ -33,7 +29,3 @@ get_replication() {
 ###
 
 get_base
-
-get_config
-
-#get_replication
