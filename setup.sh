@@ -16,6 +16,7 @@ VERBOSE=$YES
 
 
 TS=$( date +%Y-%m-%d_%H%M%S )
+CWD=$( dirname "$0" )
 
 
 log() {
@@ -35,7 +36,7 @@ set_install_dir() {
   # Update any files that need INSTALL_DIR
   local _pattern='___INSTALL_DIR___'
   local _replacement="$INSTALL_DIR"
-  grep -r --files-with-matches -F "$_pattern" "$IPF_PATH" \
+  grep -r --files-with-matches -F "$_pattern" "${CWD}" \
   | while read; do
       sed -i -e "s?$_pattern?$_replacement?" "$REPLY"
     done
@@ -49,7 +50,7 @@ install_files() {
     --compare \
     --verbose \
     --suffix="${TS}" \
-    $(ls bin/*.sh )
+    "${CWD}"/bin/*.sh
 }
 
 
