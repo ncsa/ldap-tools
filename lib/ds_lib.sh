@@ -7,8 +7,8 @@ INSTANCE_NAME=ncsa-test-ldap
 
 EMAIL=ldap-admin@lists.ncsa.illinois.edu
 
-SERVER_INF="${INSTALL_DIR}"/"${INSTANCE_NAME}".inf
-DNPW_FN="${INSTALL_DIR}"/dnpw
+SERVER_INF="${INSTALL_DIR}"/live/"${INSTANCE_NAME}".inf
+DNPW_FN="${INSTALL_DIR}"/live/dnpw
 #DNPW=$( cat "${DNPW_FN}" ) now at end of file, comment remains as reminder
 HOST=$( hostname -f )
 LETSENCRYPT_BASE=/etc/letsencrypt
