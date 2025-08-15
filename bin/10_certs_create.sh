@@ -1,11 +1,11 @@
 #!/usr/bin/bash
 
 INSTALL_DIR='___INSTALL_DIR___'
-. "${INSTALL_DIR}"/ds_lib.sh
+. "${INSTALL_DIR}"/lib/ds_lib.sh
 
 HOOK_DIR="${LETSENCRYPT_BASE}"/renewal-hooks
 PRE_DIR="${HOOK_DIR}"/pre
-PRE_HOOK="${PRE_DIR}"/99_open_firewall_port_80.sh
+PRE_HOOK="${PRE_DIR}"/01_open_firewall_port_80.sh
 POST_DIR="${HOOK_DIR}"/post
 POST_HOOK="${POST_DIR}"/99_close_firewall_port_80.sh
 TEST=1
@@ -80,6 +80,8 @@ get_cert() {
   set -x
   /usr/bin/certbot \
     certonly \
+    --non-interactive \
+    --keep \
     --standalone \
     --verbose \
     -d "${HOST}" \

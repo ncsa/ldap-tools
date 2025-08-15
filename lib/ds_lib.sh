@@ -1,23 +1,26 @@
+# general settings
 INSTALL_DIR='___INSTALL_DIR___'
 YES=0
 NO=1
 
+# 389ds settings
 PAM_AUTH=$NO
 INSTANCE_NAME=ncsa-test-ldap
-
-EMAIL=ldap-admin@lists.ncsa.illinois.edu
-
-SERVER_INF="${INSTALL_DIR}"/"${INSTANCE_NAME}".inf
-DNPW_FN="${INSTALL_DIR}"/dnpw
+SERVER_INF="${INSTALL_DIR}"/live/"${INSTANCE_NAME}".inf
+DNPW_FN="${INSTALL_DIR}"/live/dnpw
 #DNPW=$( cat "${DNPW_FN}" ) now at end of file, comment remains as reminder
 HOST=$( hostname -f )
+
+# certificate related
+EMAIL=ldap-admin@lists.ncsa.illinois.edu
 LETSENCRYPT_BASE=/etc/letsencrypt
 CERT_DIR="${LETSENCRYPT_BASE}"/live/"${HOST}"
 HOST_KEY="${CERT_DIR}"/privkey.pem
 HOST_CERT="${CERT_DIR}"/cert.pem
 CA_CERT="${CERT_DIR}"/chain.pem
 CA_NAME="LetsEncrypt CA"
-NICKNAME='Server-Cert'
+
+# host command paths
 DSCONF=/usr/sbin/dsconf
 DSCTL=/usr/sbin/dsctl
 

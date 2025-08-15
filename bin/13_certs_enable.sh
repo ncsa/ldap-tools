@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 
 INSTALL_DIR='___INSTALL_DIR___'
-. "${INSTALL_DIR}"/ds_lib.sh
+. "${INSTALL_DIR}"/lib/ds_lib.sh
 
 
 enable_tls() {
@@ -22,7 +22,7 @@ set_nss_stuff() {
     security rsa set \
     --tls-allow-rsa-certificates on \
     --nss-token "internal (software)" \
-    --nss-cert-name "${NICKNAME}"
+    --nss-cert-name 'Server-Cert'
 }
 
 # Disable plain text LDAP port

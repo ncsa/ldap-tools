@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 
 INSTALL_DIR='___INSTALL_DIR___'
-. "${INSTALL_DIR}"/ds_lib.sh
+. "${INSTALL_DIR}"/lib/ds_lib.sh
 
 install_pkgs() {
 

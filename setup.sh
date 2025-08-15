@@ -16,7 +16,7 @@ VERBOSE=$YES
 
 
 TS=$( date +%Y-%m-%d_%H%M%S )
-BASE=$( dirname "$0" )
+BASE=$( readlink -e $( dirname "$0" ) )
 
 
 log() {
@@ -43,14 +43,52 @@ set_install_dir() {
 }
 
 
-install_files() {
-  install \
-    -D \
-    --compare \
-    --verbose \
-    --suffix="${TS}" \
-    -t "${INSTALL_DIR}" \
-    "${BASE}"/bin/*.sh
+install_subdirs() {
+  [[ $DEBUG -eq $YES ]] && set -x
+  local _dirs=( bin files live lib )
+  local _base_len
+  let "_base_len = ${#BASE} + 1"
+
+  for dir in "${_dirs[@]}"; do
+
+    # make target dirs
+    for tgt in $( find "${BASE}"/"${dir}" -type d ); do
+      local _subd="${tgt:${_base_len}}"
+      install -d "${INSTALL_DIR}"/"${_subd}"
+    done
+
+    # install each file
+    for file in $( find "${BASE}"/"${dir}" -type f ); do
+      local _file=$( basename "${file}" )
+      local _dir=$(dirname "${file}" )
+      local _subd="${_dir:${_base_len}}"
+      install \
+        -D \
+        --compare \
+        --verbose \
+        --suffix="${TS}" \
+        -t "${INSTALL_DIR}"/"${_subd}" \
+        "${file}"
+    done
+
+  done
+}
+
+
+mk_symlinks() {
+  [[ $DEBUG -eq $YES ]] && set -x
+  declare -A _links=(
+    [stop]=serverctl
+    [start]=serverctl
+    [restart]=serverctl
+    [status]=serverctl
+    [dsconf]=dsrunit
+    [dsctl]=dsrunit
+  )
+
+  for k in "${!_links[@]}"; do
+    ln -sr "${INSTALL_DIR}"/bin/"${_links[$k]}" "${INSTALL_DIR}"/bin/"${k}"
+  done
 }
 
 
@@ -58,4 +96,6 @@ install_files() {
 
 set_install_dir
 
-install_files
+install_subdirs
+
+mk_symlinks
