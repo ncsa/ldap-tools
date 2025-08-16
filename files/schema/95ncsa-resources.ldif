@@ -1,0 +1,138 @@
+# Definitions for objectclasses and attributes used for NCSA resrouce specific
+# heirarchies. These should be combined with other appropriate
+# user (posixAccount) and group (groupOfUniqueNames) object classes
+# when creating entries
+# NCSA LDAP OID range begins at 1.3.6.1.4.1.34998.3.4.
+#
+######################################################
+dn: cn=schema
+######################################################
+attributeTypes: ( 1.3.6.1.4.1.34998.3.4.2.1
+  NAME 'ncsaAccount'
+  DESC 'Pointer to NCSA root user entry'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
+  SINGLE-VALUE X-ORIGIN 'NCSA-RESOURCE' )
+attributeTypes: ( 1.3.6.1.4.1.34998.3.4.2.2
+  NAME 'isPI'
+  DESC 'simple check for locating PIs'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.7
+  SINGLE-VALUE X-ORIGIN 'NCSA-RESOURCE' )
+attributeTypes: ( 1.3.6.1.4.1.34998.3.4.2.3
+  NAME 'piOfProject'
+  DESC 'DN of project this user is a PI of'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
+  X-ORIGIN 'NCSA-RESOURCE' )
+attributeTypes: ( 1.3.6.1.4.1.34998.3.4.2.4
+  NAME 'ncsaGroup'
+  DESC 'Pointer to NCSA root group entry'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
+  SINGLE-VALUE X-ORIGIN 'NCSA-RESOURCE' )
+attributeTypes: ( 1.3.6.1.4.1.34998.3.4.2.5
+  NAME 'gridDN'
+  DESC 'A user gridmap DN'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.26
+  SINGLE-VALUE X-ORIGIN 'NCSA-RESOURCE' )
+attributeTypes: ( 1.3.6.1.4.1.34998.3.4.2.6
+  NAME 'projectPI'
+  DESC 'Pointer to the PIs ncsa user entry'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
+  SINGLE-VALUE X-ORIGIN 'NCSA-RESOURCE' )
+attributeTypes: ( 1.3.6.1.4.1.34998.3.4.2.7
+  NAME 'project'
+  DESC 'Project name with allocation prefix'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  SINGLE-VALUE X-ORIGIN 'NCSA-RESOURCE' )
+attributeTypes: ( 1.3.6.1.4.1.34998.3.4.2.8
+  NAME 'projectTitle'
+  DESC 'Project title(short)'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  SINGLE-VALUE X-ORIGIN 'NCSA-RESOURCE' )
+attributeTypes: ( 1.3.6.1.4.1.34998.3.4.2.9
+  NAME 'awardType'
+  DESC 'NCSA allocation category'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.26
+  SINGLE-VALUE X-ORIGIN 'NCSA-RESOURCE' )
+attributeTypes: ( 1.3.6.1.4.1.34998.3.4.2.10
+  NAME 'projectBegin'
+  DESC 'Project activation date'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.26
+  SINGLE-VALUE X-ORIGIN 'NCSA-RESOURCE' )
+attributeTypes: ( 1.3.6.1.4.1.34998.3.4.2.11
+  NAME 'projectEnd'
+  DESC 'Project end date'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.26
+  SINGLE-VALUE X-ORIGIN 'NCSA-RESOURCE' )
+attributeTypes: ( 1.3.6.1.4.1.34998.3.4.2.12
+  NAME 'projectReqID'
+  DESC 'Project submission/request ID'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.26
+  SINGLE-VALUE X-ORIGIN 'NCSA-RESOURCE' )
+attributeTypes: ( 1.3.6.1.4.1.34998.3.4.2.13
+  NAME 'isDeactivated'
+  DESC 'Check if system access is deactivated'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.7
+  SINGLE-VALUE X-ORIGIN 'NCSA-RESOURCE' )
+attributeTypes: ( 1.3.6.1.4.1.34998.3.4.2.14
+  NAME 'deactivatedDate'
+  DESC 'Access deactivation date'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.26
+  SINGLE-VALUE X-ORIGIN 'NCSA-RESOURCE' )
+attributeTypes: ( 1.3.6.1.4.1.34998.3.4.2.15
+  NAME 'projectQuotas'
+  DESC 'JSON stored as string containing project quotas'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  SINGLE-VALUE X-ORIGIN 'NCSA-RESOURCE' )
+attributeTypes: ( 1.3.6.1.4.1.34998.3.4.2.16
+  NAME 'projectPaths'
+  DESC 'JSON stored as string containing project paths'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  SINGLE-VALUE X-ORIGIN 'NCSA-RESOURCE' )
+attributeTypes: ( 1.3.6.1.4.1.34998.3.4.2.17
+  NAME 'manStorPaths'
+  DESC 'JSON stored as string containing directory paths of acctd managed storage spaces'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  SINGLE-VALUE X-ORIGIN 'NCSA-RESOURCE' )
+attributeTypes: ( 1.3.6.1.4.1.34998.3.4.2.18
+  NAME 'manStorQuotas'
+  DESC 'JSON stored as string containing quotas information of acctd managed storage spaces'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  SINGLE-VALUE X-ORIGIN 'NCSA-RESOURCE' )
+attributeTypes: ( 1.3.6.1.4.1.34998.3.4.2.19
+  NAME 'resAlloc'
+  DESC 'JSON stored as string containing allocation information for a specific resource'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'NCSA-RESOURCE' )
+attributeTypes: ( 1.3.6.1.4.1.34998.3.4.2.20
+  NAME 'accountStatus'
+  DESC 'Account status indicator'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  SINGLE-VALUE X-ORIGIN 'NCSA-RESOURCE' )
+attributeTypes: ( 1.3.6.1.4.1.34998.3.4.2.21
+  NAME 'manStor'
+  DESC 'JSON stored as string containing details about a specific storage resource'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'NCSA-RESOURCE' )
+######################################################
+objectClasses: ( 1.3.6.1.4.1.34998.3.4.1.1
+  NAME 'ncsaProjectUser'
+  SUP Top
+  AUXILIARY
+  MUST ( cn $ uid $ uidNumber $ gidNumber $
+         homeDirectory $ loginShell )
+  MAY ( ncsaAccount $ isPI $ gridDN $
+        piOfProject $ projectQuotas $
+        isDeactivated $ deactivatedDate $ manStor $
+        manStorPaths $ manStorQuotas $ accountStatus)
+  X-ORIGIN 'NCSA-RESOURCE' )
+objectClasses: ( 1.3.6.1.4.1.34998.3.4.1.2
+  NAME 'ncsaProjectGroup'
+  SUP Top
+  AUXILIARY
+  MUST ( cn )
+  MAY ( ncsaGroup $ projectPI $ project $ projectTitle $
+        awardType $ projectBegin $ projectEnd $
+        projectReqID $ isDeactivated $ deactivatedDate $
+        projectQuotas $ projectPaths $ manStorPaths $
+        manStorQuotas $ resAlloc $ accountStatus $
+        manStor )
+  X-ORIGIN 'NCSA-RESOURCE' )
