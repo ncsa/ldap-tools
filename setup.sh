@@ -87,7 +87,10 @@ mk_symlinks() {
   )
 
   for k in "${!_links[@]}"; do
-    ln -sr "${INSTALL_DIR}"/bin/"${_links[$k]}" "${INSTALL_DIR}"/bin/"${k}"
+    src="${INSTALL_DIR}"/bin/"${_links[$k]}"
+    tgt="${INSTALL_DIR}"/bin/"${k}"
+    [[ -e "${tgt}" ]] \
+    || ln -sr "${src}" "${tgt}"
   done
 }
 

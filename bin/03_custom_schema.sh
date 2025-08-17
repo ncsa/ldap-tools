@@ -10,7 +10,7 @@ install_ldifs() {
     --compare \
     --verbose \
     --suffix="${TS}" \
-    -t /etc/dirsrv/slapd-"${INSTANCE_NAME}"/schema \
+    -t /etc/dirsrv/slapd-"${DS_INSTANCE_NAME}"/schema \
   "${INSTALL_DIR}"/files/schema/*.ldif
 }
 

@@ -5,12 +5,10 @@ INSTALL_DIR='___INSTALL_DIR___'
 
 
 configure_memberof() {
-  _dsconf \
-    plugin memberof \
+  _dsconf plugin memberof \
     set --groupattr=uniqueMember
 
-  _dsconf \
-    plugin memberof \
+  _dsconf plugin memberof \
     enable
 
   # check with
@@ -19,11 +17,11 @@ configure_memberof() {
 
 
 configure_krb_auth() {
-  if [[ $PAM_AUTH -eq $YES ]] ; then
-    _dsconf pam-pass-through-auth enable
-  fi
+  _dsconf plugin pam-pass-through-auth \
+    enable
 
   # check with ?
+  _dsconf plugin list | grep -i through
 }
 
 
@@ -33,4 +31,5 @@ configure_krb_auth() {
 
 configure_memberof
 
-configure_krb_auth
+[[ $PAM_AUTH -eq $YES ]] \
+  && configure_krb_auth

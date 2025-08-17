@@ -2,13 +2,21 @@
 INSTALL_DIR='___INSTALL_DIR___'
 YES=0
 NO=1
+VERBOSE=$YES
+DEBUG=$YES
+# ANSI escape codes for colors
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+NC='\033[0m'  # No Color
 
 # 389ds settings
 PAM_AUTH=$NO
-INSTANCE_NAME=ncsa-test-ldap
-SERVER_INF="${INSTALL_DIR}"/live/"${INSTANCE_NAME}".inf
+PAM_AUTH_FN='/etc/pam.d/ldapserver'
+DS_INSTANCE_NAME=ncsa-test-ldap
+DS_SERVER_INF="${INSTALL_DIR}"/live/"${DS_INSTANCE_NAME}".inf
+DS_SUFFIX='dc=ncsa,dc=illinois,dc=edu'
 DNPW_FN="${INSTALL_DIR}"/live/dnpw
-#DNPW=$( cat "${DNPW_FN}" ) now at end of file, comment remains as reminder
+DNPW= #actual definition at end of file
 HOST=$( hostname -f )
 
 # certificate related
@@ -24,6 +32,30 @@ CA_NAME="LetsEncrypt CA"
 DSCONF=/usr/sbin/dsconf
 DSCTL=/usr/sbin/dsctl
 
+# replication settings
+REPL_PW_FN="${INSTALL_DIR}"/live/replpw
+#REPL_PW= #actual definition at end of file
+REPL_PORT='389'
+REPL_PROTOCOL='LDAP'
+
+
+err() {
+  echo -e "${RED}✗ ERROR: $*${NC}" #| tee /dev/stderr
+}
+
+ 
+success() {
+  echo -e "${GREEN}✓ $*${NC}" #| tee /dev/stderr
+}
+ 
+ 
+die() {
+  err "$*"
+  echo "from (${BASH_SOURCE[1]} [${BASH_LINENO[0]}] ${FUNCNAME[1]})"
+  kill 0
+  exit 99
+}
+
 
 _dsconf() {
   $DSCONF \
@@ -35,7 +67,7 @@ _dsconf() {
 
 
 _dsctl() {
-  $DSCTL "${INSTANCE_NAME}" \
+  $DSCTL "${DS_INSTANCE_NAME}" \
     "${@}"
 }
 
@@ -64,11 +96,17 @@ get_replication_config() {
 
 
 mk_passwd() {
-  tr -dc A-Za-z0-9 </dev/urandom | head -c 13
+  tr -dc A-Za-z0-9 </dev/urandom | head -c 50
 }
 
-# on first run, make passwd
+# on first run, make passwds
 [[ -f "${DNPW_FN}" ]] || {
   mk_passwd >"${DNPW_FN}"
 }
 DNPW=$( cat "${DNPW_FN}" )
+
+
+[[ -f "${REPL_PW_FN}" ]] || {
+  mk_passwd >"${REPL_PW_FN}"
+}
+REPL_PW=$( cat "${REPL_PW_FN}" )

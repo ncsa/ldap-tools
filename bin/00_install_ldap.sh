@@ -29,22 +29,36 @@ install_pkgs() {
 
 
 mk_ldap_inf() {
-  [[ -f "${SERVER_INF}" ]] \
-  || cat <<ENDHERE >"${SERVER_INF}"
+  [[ -f "${DS_SERVER_INF}" ]] || {
+    cat <<ENDHERE >"${DS_SERVER_INF}"
 [general]
 [slapd]
-instance_name = ${INSTANCE_NAME}
+instance_name = ${DS_INSTANCE_NAME}
 root_password = ${DNPW}
 self_sign_cert = False
 [backend-userroot]
 create_suffix_entry = True
-suffix = dc=ncsa,dc=illinois,dc=edu
+suffix = ${DS_SUFFIX}
 ENDHERE
+  }
+}
+
+
+mk_pam_auth() {
+  [[ -f "${PAM_AUTH_FN}" ]] || {
+    cat <<ENDHERE >"${PAM_AUTH_FN}"
+auth        sufficient    pam_krb5.so no_user_check
+account     sufficient    pam_krb5.so no_user_check
+account     required     pam_nologin.so
+ENDHERE
+  }
 }
 
 
 install_ldap_server() {
-  /usr/sbin/dscreate from-file "${SERVER_INF}"
+  local _instance_dir=/var/lib/dirsrv/slapd-"${DS_INSTANCE_NAME}"
+  [[ -d "${_instance_dir}" ]] \
+  || /usr/sbin/dscreate from-file "${DS_SERVER_INF}"
 }
 
 
@@ -58,6 +72,8 @@ get_status() {
 ###
 
 mk_ldap_inf
+
+[[ "${PAM_AUTH}" -eq $YES ]] && mk_pam_auth
 
 install_pkgs
 
