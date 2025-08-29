@@ -15,7 +15,7 @@ do_configure() {
   for k in "${!SETTINGS[@]}"; do 
     _settings_vals+=("--${k}" "${SETTINGS[$k]}")
   done
-  # settings are live right away, no need to restart
+  # settings take effect immediately, no need to restart
   _dsconf \
     backend config set \
     "${_settings_vals[@]}"

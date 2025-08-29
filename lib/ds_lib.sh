@@ -12,12 +12,17 @@ NC='\033[0m'  # No Color
 # 389ds settings
 PAM_AUTH=$NO
 PAM_AUTH_FN='/etc/pam.d/ldapserver'
-DS_INSTANCE_NAME=ncsa-test-ldap
-DS_SERVER_INF="${INSTALL_DIR}"/live/"${DS_INSTANCE_NAME}".inf
 DS_SUFFIX='dc=ncsa,dc=illinois,dc=edu'
-DNPW_FN="${INSTALL_DIR}"/live/dnpw
-DNPW= #actual definition at end of file
+DS_INSTANCE_NAME=ncsa-test-ldap
+DS_SERVER_INF=/root/.config/ldap/"${DS_INSTANCE_NAME}"/"${DS_INSTANCE_NAME}".inf
+DNPW_FN=/root/.config/ldap/"${DS_INSTANCE_NAME}"/dnpw
+#DNPW= #actual definition at end of file
 HOST=$( hostname -f )
+
+# 389ds log parsing & monitoring
+DS_LOGDIR=/var/log/dirsrv/slapd-"${DS_INSTANCE_NAME}"
+DS_VENV="${INSTALL_DIR}"/.venv
+DS_PY3="${DS_VENV}"/bin/python3
 
 # certificate related
 EMAIL=ldap-admin@lists.ncsa.illinois.edu
@@ -33,8 +38,8 @@ DSCONF=/usr/sbin/dsconf
 DSCTL=/usr/sbin/dsctl
 
 # replication settings
-REPL_PW_FN="${INSTALL_DIR}"/live/replpw
-#REPL_PW= #actual definition at end of file
+REPLPW_FN=/root/.config/ldap/"${DS_INSTANCE_NAME}"/replpw
+#REPLPW= #actual definition at end of file
 REPL_PORT='389'
 REPL_PROTOCOL='LDAP'
 
@@ -60,7 +65,7 @@ die() {
 _dsconf() {
   $DSCONF \
     -D "cn=Directory Manager" \
-    -w "${DNPW}" \
+    -y "${DNPW_FN}" \
     ldap://"${HOST}" \
     "${@}"
 }
@@ -76,7 +81,7 @@ _ldapsearch() {
   /usr/bin/ldapsearch \
     -H ldaps://"${HOST}":636 \
     -D "cn=Directory Manager" \
-    -w "${DNPW}" \
+    -y "${DNPW_FN}" \
     "${@}"
 }
 
@@ -101,12 +106,18 @@ mk_passwd() {
 
 # on first run, make passwds
 [[ -f "${DNPW_FN}" ]] || {
-  mk_passwd >"${DNPW_FN}"
+  pw_dir="$( dirname ${DNPW_FN} )"
+  mkdir -p "${pw_dir}"
+  pwd_val=$(mk_passwd)
+  printf "${pwd_val}" >"${DNPW_FN}" #ensure there is no newline char
+  chmod 400 "${DNPW_FN}"
 }
-DNPW=$( cat "${DNPW_FN}" )
 
 
-[[ -f "${REPL_PW_FN}" ]] || {
-  mk_passwd >"${REPL_PW_FN}"
+[[ -f "${REPLPW_FN}" ]] || {
+  pw_dir="$( dirname ${REPLPW_FN} )"
+  mkdir -p "${pw_dir}"
+  pwd_val=$(mk_passwd)
+  printf "${pwd_val}" >"${REPLPW_FN}" #ensure there is no newline char
+  chmod 400 "${REPLPW_FN}"
 }
-REPL_PW=$( cat "${REPL_PW_FN}" )

@@ -45,7 +45,7 @@ set_install_dir() {
 
 install_subdirs() {
   [[ $DEBUG -eq $YES ]] && set -x
-  local _dirs=( bin files live lib )
+  local _dirs=( bin files live lib lap )
   local _base_len
   let "_base_len = ${#BASE} + 1"
 
@@ -82,8 +82,9 @@ mk_symlinks() {
     [start]=serverctl
     [restart]=serverctl
     [status]=serverctl
-    [dsconf]=dsrunit
-    [dsctl]=dsrunit
+    [dsconf]=dsc
+    [dsctl]=dsc
+    [ldapsearch]=dsc
   )
 
   for k in "${!_links[@]}"; do

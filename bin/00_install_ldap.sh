@@ -9,7 +9,7 @@ install_pkgs() {
     https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
   )
   local _pkgs=(
-    389-ds-base 
+    389-ds-base
     certbot
   )
 
@@ -30,16 +30,19 @@ install_pkgs() {
 
 mk_ldap_inf() {
   [[ -f "${DS_SERVER_INF}" ]] || {
+    local _dnpw="$( cat ${DNPW_FN} )"
     cat <<ENDHERE >"${DS_SERVER_INF}"
 [general]
 [slapd]
 instance_name = ${DS_INSTANCE_NAME}
-root_password = ${DNPW}
+root_password = ${_dnpw}
 self_sign_cert = False
+db_lib = mdb
 [backend-userroot]
 create_suffix_entry = True
 suffix = ${DS_SUFFIX}
 ENDHERE
+  chmod 400 "${DS_SERVER_INF}"
   }
 }
 

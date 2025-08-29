@@ -1,0 +1,14 @@
+Golang requires treating a directory as a GO module in order
+to fetch dependencies.
+
+Once ldap-tools is installed, a setup script will run
+* go mod init lap
+* go mod tidy
+* go build
+
+The first creates a "module" structure.
+The second fetches dependencies.
+The third builds an executable.
+
+The custom installer script will put the executable in the bin dir
+and then clean up this folder entirely.

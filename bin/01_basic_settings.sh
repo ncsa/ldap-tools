@@ -12,7 +12,9 @@ configure_memberof() {
     enable
 
   # check with
-  _dsconf plugin list | grep -i memberof
+  # _dsconf plugin list | grep -i memberof
+  _dsconf plugin memberof status
+  _dsconf plugin memberof show
 }
 
 

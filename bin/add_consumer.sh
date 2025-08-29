@@ -38,7 +38,13 @@ check_replication_agreement() {
 ###
 
 consumer_hostname="${1}"
-consumer_pwd="${2}"
+[[ -z "${consumer_hostname}" ]] && die 'missing consumer hostname'
+host "${REPL_FQDN}" >/dev/null 2>&1 || die "DNS lookup failed for '${consumer_hostname}'"
+shift
+
+consumer_pwd="${1}"
+[[ -z "${consumer_pwd}" ]] && die 'missing replication pwd'
+shift
 
 add_consumer
 
