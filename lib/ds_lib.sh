@@ -12,12 +12,17 @@ NC='\033[0m'  # No Color
 # 389ds settings
 PAM_AUTH=$NO
 PAM_AUTH_FN='/etc/pam.d/ldapserver'
+DS_SUFFIX='dc=ncsa,dc=illinois,dc=edu'
 DS_INSTANCE_NAME=ncsa-test-ldap
 DS_SERVER_INF="${INSTALL_DIR}"/live/"${DS_INSTANCE_NAME}".inf
-DS_SUFFIX='dc=ncsa,dc=illinois,dc=edu'
 DNPW_FN="${INSTALL_DIR}"/live/dnpw
 DNPW= #actual definition at end of file
 HOST=$( hostname -f )
+
+# 389ds log parsing & monitoring
+DS_LOGDIR=/var/log/dirsrv/slapd-"${DS_INSTANCE_NAME}"
+DS_VENV="${INSTALL_DIR}"/.venv
+DS_PY3="${DS_VENV}"/bin/python3
 
 # certificate related
 EMAIL=ldap-admin@lists.ncsa.illinois.edu

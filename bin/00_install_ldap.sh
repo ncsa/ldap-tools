@@ -9,7 +9,7 @@ install_pkgs() {
     https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
   )
   local _pkgs=(
-    389-ds-base 
+    389-ds-base
     certbot
   )
 
