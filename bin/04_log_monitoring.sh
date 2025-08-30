@@ -4,16 +4,40 @@ INSTALL_DIR='___INSTALL_DIR___'
 . "${INSTALL_DIR}"/lib/ds_lib.sh
 
 LAP_DIR="${INSTALL_DIR}"/lap
+TMP_DIR="${INSTALL_DIR}"/temp
+GO="${TMP_DIR}"/go/bin/go
 
 set -x
 
-install_pkgs() {
-  local _pkgs=(
-    golang    #needed for lap.go (from github.com/aidan-/ldap-access-parser)
-  )
 
-  #install packages
-  dnf -y install "${_pkgs[@]}"
+install_go() {
+  local _URL=https://go.dev/dl/go1.25.0.linux-amd64.tar.gz
+  local _tgz=go1.25.0.linux-amd64.tar.gz
+  [[ -d "${TMP_DIR}" ]] || {
+    mkdir "${TMP_DIR}"
+    pushd "${TMP_DIR}"
+    wget "${_url}"
+    tar -zxf "${_tgz}"
+    rm "${_tgz}"
+    popd
+  }
+}
+
+
+install_lap() {
+  [[ -f "${INSTALL_DIR}"/bin/lap ]] || {
+    # build an executable
+    pushd "${LAP_DIR}"
+    "${GO}" mod init lap
+    "${GO}" mod tidy
+    "${GO}" build
+    popd
+    # install the executable
+    install \
+      --verbose \
+      -t "${INSTALL_DIR}"/bin \
+      "${LAP_DIR}"/lap
+  }
 }
 
 
@@ -27,23 +51,6 @@ setup_venv() {
   "${DS_PY3}" -m pip install --upgrade pip
 
   "${DS_PY3}" -m pip install -r "${INSTALL_DIR}"/files/python_deps.txt
-}
-
-
-install_lap() {
-  [[ -f "${INSTALL_DIR}"/bin/lap ]] || {
-    # build an executable
-    pushd "${LAP_DIR}"
-    /usr/bin/go mod init lap
-    /usr/bin/go mod tidy
-    /usr/bin/go build
-    popd
-    # install the executable
-    install \
-      --verbose \
-      -t "${INSTALL_DIR}"/bin \
-      "${LAP_DIR}"/lap
-  }
 }
 
 
@@ -64,10 +71,10 @@ cleanup() {
 # MAIN
 ###
 
-install_pkgs
-
-setup_venv
+install_go
 
 install_lap
+
+setup_venv
 
 cleanup
