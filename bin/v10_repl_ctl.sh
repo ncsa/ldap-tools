@@ -8,9 +8,9 @@ LDAPMODIFY=/bin/ldapmodify
 
 YES=0
 NO=1
-FQDN_IS_VALID=${NO}
-PASSWD_IS_VALID=${NO}
-CN_IS_VALID=${NO}
+REPL_FQDN_IS_VALID=${NO}
+REPL_PASSWD_IS_VALID=${NO}
+REPL_CN_IS_VALID=${NO}
 LAST_ERR_MSG='?'
 
 
@@ -21,12 +21,12 @@ die() {
 
 
 do_ldap_modify() {
-  cat
-#  "${LDAPMODIFY}" \
-#    -H ldaps://"${FQDN}" \
-#    -D "cn=Directory Manager" \
-#    -x \
-#    -y "${PASSWD_FN}"
+  set -x
+ "${LDAPMODIFY}" \
+   -H ldaps://"${FQDN}" \
+   -D "cn=Directory Manager" \
+   -x \
+   -y "${PASSWD_FN}"
 }
 
 
@@ -42,7 +42,7 @@ mk_dn() {
 
 
 validate_fqdn() {
-  if [[ ${FQDN_IS_VALID} -eq ${NO} ]] ; then
+  if [[ ${REPL_FQDN_IS_VALID} -eq ${NO} ]] ; then
     # All must pass for FQDN to be valid.
     [[ -z "${REPL_FQDN}" ]] && {
       LAST_ERR_MSG='FQDN cannot be empty'
@@ -53,15 +53,15 @@ validate_fqdn() {
       return ${NO}
     }
   fi
-  FQDN_IS_VALID=${YES}
-  return ${FQDN_IS_VALID}
+  REPL_FQDN_IS_VALID=${YES}
+  return ${REPL_FQDN_IS_VALID}
 }
 
 
 validate_passwd() {
-  if [[ ${PASSWD_IS_VALID} -eq ${NO} ]] ; then
+  if [[ ${REPL_PASSWD_IS_VALID} -eq ${NO} ]] ; then
     # All must pass for password to be valid.
-    [[ -z "${#REPL_PASSWD}" ]] && {
+    [[ -z "${REPL_PASSWD}" ]] && {
       LAST_ERR_MSG='Password cannot be empty'
       return ${NO}
     }
@@ -69,14 +69,14 @@ validate_passwd() {
       LAST_ERR_MSG='Password too short'
       return ${NO}
     }
-    PASSWD_IS_VALID=${YES}
+    REPL_PASSWD_IS_VALID=${YES}
   fi
-  return ${PASSWD_IS_VALID}
+  return ${REPL_PASSWD_IS_VALID}
 }
 
 
 validate_cn() {
-  if [[ ${CN_IS_VALID} -eq ${NO} ]] ; then
+  if [[ ${REPL_CN_IS_VALID} -eq ${NO} ]] ; then
     # All must pass for CN to be valid.
     [[ -z "${#REPL_CN}" ]] && {
       LAST_ERR_MSG='CN cannot be empty'
@@ -86,9 +86,9 @@ validate_cn() {
       LAST_ERR_MSG='CN too short'
       return ${NO}
     }
-    CN_IS_VALID=${YES}
+    REPL_CN_IS_VALID=${YES}
   fi
-  return ${CN_IS_VALID}
+  return ${REPL_CN_IS_VALID}
 }
 
 

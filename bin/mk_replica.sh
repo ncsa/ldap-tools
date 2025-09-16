@@ -52,7 +52,7 @@ Replication pwd: "$( cat ${REPLPW_FN} )"
 Replication pwd file: ${REPLPW_FN}
 
 On the SUPPLIER server, run:
-${INSTALL_DIR}/bin/add_consumer \\
+${INSTALL_DIR}/bin/add_consumer.sh \\
 ${HOST} \\
 $( cat ${REPLPW_FN} )
 ENDHERE
