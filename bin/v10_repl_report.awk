@@ -21,23 +21,22 @@ LAST_INIT_END = "?"
 
 function print_replica() {
   printf "%s\n", DN
-  format = "%40s %10s %7s %15s %15s %2s %15s %15s %2s\n"
-  printf format, "", "", "",
-    "LAST_INIT", "LAST_INIT", "LAST_INIT",
+  format = "%40s %10s %7s %15s %15s %9s %15s %15s %9s\n"
+  printf format, "", "", "", \
+    "LAST_INIT", "LAST_INIT", "LAST_INIT", \
     "LAST_UPDATE", "LAST_UPDATE", "LAST_UPDATE"
-  printf format, "FQDN", "REPLICA_ID", "ENABLED", 
-    "START", "END", "STATUS",
-    "START", "END", "STATUS",
-  printf format, FQDN, REPLICA_ID, ENABLED,
-    LAST_INIT_START, LAST_INIT_END, LAST_INIT_STATUS,
-    LAST_UPDATE_START, LAST_UPDATE_END, LAST_UPDATE_STATUS,
+  printf format, "FQDN", "REPLICA_ID", "ENABLED", \
+    "START", "END", "STATUS", \
+    "START", "END", "STATUS"
+  printf format, FQDN, REPLICA_ID, ENABLED, \
+    LAST_INIT_START, LAST_INIT_END, LAST_INIT_STATUS, \
+    LAST_UPDATE_START, LAST_UPDATE_END, LAST_UPDATE_STATUS
   if ( LAST_UPDATE_STATUS > 0 ) {
     print LAST_UPDATE_MSG
   }
   if ( LAST_INIT_STATUS > 0 ) {
     print LAST_INIT_MSG
   }
-  printf "\n"
   unset_vars()
 }
 
