@@ -12,15 +12,25 @@ HOST = "?"
 REPLICA_ID = "?"
 ENABLED = "?"
 LAST_UPDATE_STATUS = "?"
+LAST_UPDATE_START = "?"
+LAST_UPDATE_END = "?"
 LAST_INIT_STATUS = "?"
+LAST_INIT_START = "?"
+LAST_INIT_END = "?"
 }
 
 function print_replica() {
   printf "%s\n", DN
-  # printf "%20s %10s %7s %18s %16s\n", "HOST", "REPLICA_ID", "ENABLED", "LAST_UPDATE_STATUS", "LAST_INIT_STATUS"
-  # printf "%20s %10s %7s %18s %16s\n", HOST, REPLICA_ID, ENABLED, LAST_UPDATE_STATUS, LAST_INIT_STATUS
-  printf "%40s %10s %7s %18s %16s\n", "FQDN", "REPLICA_ID", "ENABLED", "LAST_UPDATE_STATUS", "LAST_INIT_STATUS"
-  printf "%40s %10s %7s %18s %16s\n", FQDN, REPLICA_ID, ENABLED, LAST_UPDATE_STATUS, LAST_INIT_STATUS
+  format = "%40s %10s %7s %15s %15s %2s %15s %15s %2s\n"
+  printf format, "", "", "",
+    "LAST_INIT", "LAST_INIT", "LAST_INIT",
+    "LAST_UPDATE", "LAST_UPDATE", "LAST_UPDATE"
+  printf format, "FQDN", "REPLICA_ID", "ENABLED", 
+    "START", "END", "STATUS",
+    "START", "END", "STATUS",
+  printf format, FQDN, REPLICA_ID, ENABLED,
+    LAST_INIT_START, LAST_INIT_END, LAST_INIT_STATUS,
+    LAST_UPDATE_START, LAST_UPDATE_END, LAST_UPDATE_STATUS,
   if ( LAST_UPDATE_STATUS > 0 ) {
     print LAST_UPDATE_MSG
   }
@@ -78,6 +88,22 @@ function remove_edges(str) {
   if ( rv > 0 ) {
     REPLICA_ID = $3
   }
+}
+
+/^nsds5replicaLastUpdateStart: / {
+  LAST_UPDATE_START = $2
+}
+
+/^nsds5replicaLastUpdateEnd: / {
+  LAST_UPDATE_END = $2
+}
+
+/^nsds5replicaLastInitStart: / {
+  LAST_INIT_START = $2
+}
+
+/^nsds5replicaLastInitEnd: / {
+  LAST_INIT_END = $2
 }
 
 

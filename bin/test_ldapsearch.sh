@@ -1,24 +1,24 @@
 #!/usr/bin/bash
 
-set -x
+# set -x
 
 HOST=ldap-auth4.ncsa.illinois.edu
 RUNTIME=3600
 BASE='ou=People,dc=ncsa,dc=illinois,dc=edu'
-FILTER='(uid=aloftus)'
+FILTER='uid=aloftus'
 ATTRS=( uid cn givenName sn mail employeeType memberOf )
 YES=0
 NO=1
 
 do_search() {
-  set -x
+  # set -x
   ldapsearch \
     -x \
     -H ldaps://"${HOST}" \
     -b "${BASE}" \
     "scope=2" \
     "${FILTER}" \
-    "${ATTRS[@]}"
+    "${ATTRS[@]}" >/dev/null
 }
 
 
@@ -75,8 +75,12 @@ show_progress=$YES
 show_iterations=$YES
 long_runs=()
 while lessthan "${SECONDS}" "${RUNTIME}" ; do
-  TIMEFORMAT='%E'
-  elapsed=$( { time do_search >/dev/null ; } 2>&1 )
+  tstart=$(date +%s.%N)
+  do_search
+  tend=$(date +%s.%N)
+  elapsed=$( echo "$tend - $tstart" | bc);
+  # elapsed=$( { time do_search >/dev/null ; } 2>&1 )
+  # echo "${elapsed}" "${print_min}" 
   greaterthan "${elapsed}" "${print_min}" && {
     dt=$(date +"%Y-%m-%d:%H:%M:%S %Z")
     log="${elapsed} ${dt}"
