@@ -14,6 +14,8 @@ dump_db() {
 # MAIN
 ###
 
+continue_or_exit "DS389 will be stopped during the backup. Continue?"
+
 _dsctl stop
 
 dump_db
