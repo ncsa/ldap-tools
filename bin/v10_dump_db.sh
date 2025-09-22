@@ -14,6 +14,11 @@ die() {
 }
 
 
+purge_old() {
+  rm -f /tmp/replcheck_*.ldif
+}
+
+
 ldap_stop() {
   systemctl stop "${LDAP_SERVICE_NAME}"
 }
@@ -42,6 +47,8 @@ dump_db() {
 ###
 # MAIN
 ###
+
+purge_old
 
 ldap_stop
 

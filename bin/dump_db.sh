@@ -20,11 +20,18 @@ dump_db() {
   echo  "Bkup LDIF: '${_tgt}'"
 }
 
+
+purge_old() {
+  rm -f /tmp/replcheck_*.ldif
+}
+
 ###
 # MAIN
 ###
 
 continue_or_exit "DS389 will be stopped during the backup. Continue?"
+
+purge_old
 
 _dsctl stop
 
