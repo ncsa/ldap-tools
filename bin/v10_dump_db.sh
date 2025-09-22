@@ -23,13 +23,18 @@ ldap_start() {
 }
 
 dump_db() {
+  local _start=$SECONDS
   "${DB2LDIF}" -r -s "${LDAP_SUFFIX}" 
+  local _end=$SECONDS
+  local _elapsed=$( bc <<< "$_end - $_start" )
+  echo "DB backup took: $_elapsed secs"
   local _ldif_out_fn=$( ls -t "${LDIF_DIR}" | head -1)
   local _src="${LDIF_DIR}"/"${_ldif_out_fn}"
   local _tgt=/tmp/replcheck_"${HOST}"."${_ldif_out_fn}"
   # ln -s -r "${LDIF_DIR}"/"${_ldif_out_fn}" "${LDIF_DIR}"/replcheck_${HOST}.ldif
   mv "${_src}" "${_tgt}"
   chmod o+r "${_tgt}"
+  echo "Bkup LDIF file: '${_tgt}'"
 }
 
 
