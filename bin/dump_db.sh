@@ -18,6 +18,9 @@ dump_db() {
   mv "${_src}" "${_tgt}"
   chmod o+r "${_tgt}"
   echo  "Bkup LDIF: '${_tgt}'"
+
+  echo -n 'Entries in DB: '
+  grep '^dn: ' "${_tgt}" | wc -l
 }
 
 
