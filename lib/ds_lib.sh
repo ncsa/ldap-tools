@@ -46,6 +46,19 @@ REPL_PORT='389'
 REPL_PROTOCOL='LDAP'
 
 
+continue_or_exit() {
+    local msg="Continue?"
+    [[ -n "$1" ]] && msg="$1"
+    echo "$msg"
+    select yn in "Yes" "No"; do
+        case $yn in
+            Yes) return 0;;
+            No ) exit 1;;
+        esac
+    done
+}
+
+
 err() {
   echo -e "${RED}✗ ERROR: $*${NC}" #| tee /dev/stderr
 }
