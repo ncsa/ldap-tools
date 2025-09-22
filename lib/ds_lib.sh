@@ -15,12 +15,14 @@ PAM_AUTH_FN='/etc/pam.d/ldapserver'
 DS_SUFFIX='dc=ncsa,dc=illinois,dc=edu'
 DS_INSTANCE_NAME=ncsa-test-ldap
 DS_SERVER_INF=/root/.config/ldap/"${DS_INSTANCE_NAME}"/"${DS_INSTANCE_NAME}".inf
+DS_LIB_DIR=/var/lib/dirsrv/slapd-"${DS_INSTANCE_NAME}"
+DS_LDIF_DIR=/var/lib/dirsrv/slapd-"${DS_INSTANCE_NAME}"/ldif
 DNPW_FN=/root/.config/ldap/"${DS_INSTANCE_NAME}"/dnpw
 #DNPW= #actual definition at end of file
 HOST=$( hostname -f )
 
 # 389ds log parsing & monitoring
-DS_LOGDIR=/var/log/dirsrv/slapd-"${DS_INSTANCE_NAME}"
+DS_LOG_DIR=/var/log/dirsrv/slapd-"${DS_INSTANCE_NAME}"
 DS_VENV="${INSTALL_DIR}"/.venv
 DS_PY3="${DS_VENV}"/bin/python3
 
