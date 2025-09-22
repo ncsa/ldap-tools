@@ -11,6 +11,7 @@ install_pkgs() {
   local _pkgs=(
     389-ds-base
     certbot
+    bc
   )
 
   if [[ "${PAM_AUTH}" -eq $YES ]] ; then
