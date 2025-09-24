@@ -30,7 +30,7 @@ create_replication_agreement() {
     --role "${role}" \
     --replica-id "${rep_id}" \
     --suffix "${DS_SUFFIX}" \
-    --bind-dn 'cn=replication manager,cn=config' \
+    --bind-dn "${REPL_DN}" \
     --bind-passwd-file "${REPLPW_FN}"
 }
 
@@ -52,9 +52,9 @@ Replication pwd: "$( cat ${REPLPW_FN} )"
 Replication pwd file: ${REPLPW_FN}
 
 On the SUPPLIER server, run:
-${INSTALL_DIR}/bin/add_consumer.sh \\
-${HOST} \\
-$( cat ${REPLPW_FN} )
+${INSTALL_DIR}/bin/repl_ctl.sh add \\
+--host ${HOST} \\
+--pwd $( cat ${REPLPW_FN} )
 ENDHERE
       ;;
   esac

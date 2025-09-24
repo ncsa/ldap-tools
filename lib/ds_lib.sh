@@ -44,6 +44,7 @@ REPLPW_FN=/root/.config/ldap/"${DS_INSTANCE_NAME}"/replpw
 #REPLPW= #actual definition at end of file
 REPL_PORT='389'
 REPL_PROTOCOL='LDAP'
+REPL_DN='cn=replication manager,cn=config'
 
 
 continue_or_exit() {
