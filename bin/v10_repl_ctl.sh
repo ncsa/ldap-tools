@@ -11,6 +11,7 @@ NO=1
 REPL_FQDN_IS_VALID=${NO}
 REPL_PASSWD_IS_VALID=${NO}
 REPL_CN_IS_VALID=${NO}
+REPL_PORT_IS_VALID=${NO}
 LAST_ERR_MSG='?'
 
 
@@ -92,10 +93,28 @@ validate_cn() {
 }
 
 
+validate_port() {
+  if [[ ${REPL_PORT_IS_VALID} -eq ${NO} ]] ; then
+    # If not set, default to 636
+    [[ -z "${#REPL_PORT}" ]] && REPL_PORT=636
+    if [[ "${#REPL_PORT}" == "636" ]] || [[ "${#REPL_PORT}" == "389" ]] ; then
+      : pass
+    else
+      LAST_ERR_MSG="invalid PORT '${LDAP_PORT}', must be 389 or 636"
+      return ${NO}
+    fi
+    REPL_PORT_IS_VALID=${YES}
+  fi
+  return ${REPL_PORT_IS_VALID}
+}
+
+
+
 add_ra() {
   validate_fqdn || die "${LAST_ERR_MSG}"
   validate_cn || die "${LAST_ERR_MSG}"
   validate_passwd || die "${LAST_ERR_MSG}"
+  validate_port || die "${LAST_ERR_MSG}"
   cat <<ENDHERE | do_ldap_modify
 dn: ${REPL_DN}
 changetype: add
@@ -103,7 +122,7 @@ objectclass: top
 objectclass: nsds5replicationagreement
 cn: ${REPL_CN}
 nsds5replicahost: ${REPL_FQDN}
-nsds5replicaport: 636
+nsds5replicaport: ${REPL_PORT}
 nsds5ReplicaBindDN: cn=replication manager,cn=config
 nsDS5ReplicaTransportInfo: SSL
 nsds5replicabindmethod: SIMPLE
@@ -206,6 +225,10 @@ while [[ $# -gt 0 ]] && [[ $ENDWHILE -eq 0 ]] ; do
     --pwd)
       REPL_PASSWD="$2";
       validate_passwd || die "${LAST_ERR_MSG}"
+      shift;;
+    --port)
+      REPL_PORT="$2";
+      validate_port || die "${LAST_ERR_MSG}"
       shift;;
     --) ENDWHILE=1;;
     -*) echo "Invalid option '$1'"; exit 1;;
