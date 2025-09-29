@@ -117,6 +117,7 @@ init_ra() {
   validate_cn || die "${LAST_ERR_MSG}"
   _dsconf \
     repl-agmt init \
+    --suffix "${DS_SUFFIX}" \
     "${REPL_CN}"
 }
 
