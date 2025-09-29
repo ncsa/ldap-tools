@@ -5,7 +5,7 @@ INSTALL_DIR='___INSTALL_DIR___'
 
 declare -A SETTINGS=(
   [lookthroughlimit]=5001 # default 5000, set -1 to disable?
-  [locks]=10001 # default=10000
+  [locks]=50000 # default=10000
 )
 
 

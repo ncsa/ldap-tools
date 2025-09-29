@@ -52,9 +52,10 @@ Replication pwd: "$( cat ${REPLPW_FN} )"
 Replication pwd file: ${REPLPW_FN}
 
 On the SUPPLIER server, run:
-${INSTALL_DIR}/bin/repl_ctl.sh add \\
+${INSTALL_DIR}/bin/repl_ctl.sh \\
 --host ${HOST} \\
---pwd $( cat ${REPLPW_FN} )
+--pwd $( cat ${REPLPW_FN} ) \\
+add
 ENDHERE
       ;;
   esac

@@ -107,7 +107,7 @@ ENDHERE
 del_ra() {
   validate_cn || die "${LAST_ERR_MSG}"
   _dsconf \
-    repl-agmt delete
+    repl-agmt delete \
     --suffix "${DS_SUFFIX}" \
     "${REPL_CN}"
 }
@@ -116,8 +116,7 @@ del_ra() {
 init_ra() {
   validate_cn || die "${LAST_ERR_MSG}"
   _dsconf \
-    repl-agmt init
-    --suffix "${DS_SUFFIX}" \
+    repl-agmt init \
     "${REPL_CN}"
 }
 
@@ -125,7 +124,7 @@ init_ra() {
 pause_ra() {
   validate_cn || die "${LAST_ERR_MSG}"
   _dsconf \
-    repl-agmt disable
+    repl-agmt disable \
     --suffix "${DS_SUFFIX}" \
     "${REPL_CN}"
 }
@@ -134,7 +133,7 @@ pause_ra() {
 resume_ra() {
   validate_cn || die "${LAST_ERR_MSG}"
   _dsconf \
-    repl-agmt enable
+    repl-agmt enable \
     --suffix "${DS_SUFFIX}" \
     "${REPL_CN}"
 }
@@ -143,7 +142,7 @@ resume_ra() {
 poke_ra() {
   validate_cn || die "${LAST_ERR_MSG}"
   _dsconf \
-    repl-agmt poke
+    repl-agmt poke \
     --suffix "${DS_SUFFIX}" \
     "${REPL_CN}"
 }
@@ -151,7 +150,7 @@ poke_ra() {
 
 list_all() {
   _dsconf \
-    repl-agmt list
+    repl-agmt list \
     --suffix "${DS_SUFFIX}"
 }
 
@@ -230,7 +229,7 @@ ACTION="${1}"
 case "${ACTION}" in
   add)
     add_ra
-    add_ra_dsrc
+    # add_ra_to_dsrc
     ;;
   del | delete | rm | remove)
     del_ra
