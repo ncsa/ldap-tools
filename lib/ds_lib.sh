@@ -113,7 +113,7 @@ _ldapmodify() {
     -H ldaps://"${HOST}" \
     -D "cn=Directory Manager" \
     -y "${DNPW_FN}" \
-    -x \
+    -x
 }
 
 
