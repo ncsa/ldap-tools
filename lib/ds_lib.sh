@@ -112,7 +112,7 @@ _ldapsearch() {
   $LDAPSEARCH \
     -H "${LDAPI}" \
     -Y EXTERNAL \
-  | -LLL \
+    -LLL \
     "${@}"
 }
 
