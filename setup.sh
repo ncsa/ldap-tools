@@ -85,6 +85,7 @@ mk_symlinks() {
     [dsconf]=dsc
     [dsctl]=dsc
     [ldapsearch]=dsc
+    [ldapmodify]=dsc
   )
 
   for k in "${!_links[@]}"; do
