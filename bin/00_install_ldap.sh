@@ -38,7 +38,7 @@ mk_ldap_inf() {
 instance_name = ${DS_INSTANCE_NAME}
 root_password = ${_dnpw}
 self_sign_cert = False
-db_lib = mdb
+db_lib = ${DS_DB_LIB}
 [backend-userroot]
 create_suffix_entry = True
 suffix = ${DS_SUFFIX}

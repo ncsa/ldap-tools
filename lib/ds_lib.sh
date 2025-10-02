@@ -17,6 +17,8 @@ DS_INSTANCE_NAME=ncsa-test-ldap
 DS_SERVER_INF=/root/.config/ldap/"${DS_INSTANCE_NAME}"/"${DS_INSTANCE_NAME}".inf
 DS_LIB_DIR=/var/lib/dirsrv/slapd-"${DS_INSTANCE_NAME}"
 DS_LDIF_DIR=/var/lib/dirsrv/slapd-"${DS_INSTANCE_NAME}"/ldif
+DS_DB_LIB=bdb
+#DS_DB_LIB=mdb
 DNPW_FN=/root/.config/ldap/"${DS_INSTANCE_NAME}"/dnpw
 #DNPW= #actual definition at end of file
 HOST=$( hostname -f )
@@ -38,6 +40,9 @@ CA_NAME="LetsEncrypt CA"
 # host command paths
 DSCONF=/usr/sbin/dsconf
 DSCTL=/usr/sbin/dsctl
+LDAPSEARCH=/usr/bin/ldapsearch
+LDAPMODIFY=/usr/bin/ldapmodify
+
 
 # replication settings
 REPLPW_FN=/root/.config/ldap/"${DS_INSTANCE_NAME}"/replpw
@@ -94,11 +99,21 @@ _dsctl() {
 
 
 _ldapsearch() {
-  /usr/bin/ldapsearch \
-    -H ldaps://"${HOST}":636 \
+  $LDAPSEARCH \
+    -H ldaps://"${HOST}" \
     -D "cn=Directory Manager" \
     -y "${DNPW_FN}" \
     "${@}"
+}
+
+
+_ldapmodify() {
+  # reads ldif from stdin, pipe or redirect to this function
+  $LDAPMODIFY \
+    -H ldaps://"${HOST}" \
+    -D "cn=Directory Manager" \
+    -y "${DNPW_FN}" \
+    -x \
 }
 
 
