@@ -7,9 +7,12 @@ INSTALL_DIR='___INSTALL_DIR___'
 set -x
 
 get_base() {
-  _ldapsearch \
-    -s \
-    base
+  ${LDAPSEARCH} \
+    -H ldaps://${HOST} \
+    -y "${DNPW_FN}" \
+    -x \
+    -LLL \
+    -s base
 }
 
 
