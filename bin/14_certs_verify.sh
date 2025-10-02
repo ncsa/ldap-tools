@@ -8,7 +8,6 @@ set -x
 
 get_base() {
   _ldapsearch \
-    -x \
     -s \
     base
 }
