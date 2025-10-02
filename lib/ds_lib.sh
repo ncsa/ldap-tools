@@ -1,27 +1,40 @@
-# general settings
-INSTALL_DIR='___INSTALL_DIR___'
 YES=0
 NO=1
+
+# USER SETTINGS
+
+PAM_AUTH=$NO # set to either YES or NO
+
+DS_DB_LIB=bdb # either bdb or mdb
+
+DS_INSTANCE_NAME=ncsa-test-ldap # this is freetext, leave alone or remove "test"
+
+EMAIL=ldap-admin@lists.ncsa.illinois.edu
+
+# ==================================
+# END OF USER CONFIGURABLE SETTINGS
+# CHANGE NOTHING MORE BELOW HERE
+# ==================================
+
+
+# general settings
+INSTALL_DIR='___INSTALL_DIR___'
 VERBOSE=$YES
 DEBUG=$YES
 # ANSI escape codes for colors
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 NC='\033[0m'  # No Color
+HOST=$( hostname -f )
 
 # 389ds settings
-PAM_AUTH=$NO
-PAM_AUTH_FN='/etc/pam.d/ldapserver'
 DS_SUFFIX='dc=ncsa,dc=illinois,dc=edu'
-DS_INSTANCE_NAME=ncsa-test-ldap
 DS_SERVER_INF=/root/.config/ldap/"${DS_INSTANCE_NAME}"/"${DS_INSTANCE_NAME}".inf
 DS_LIB_DIR=/var/lib/dirsrv/slapd-"${DS_INSTANCE_NAME}"
 DS_LDIF_DIR=/var/lib/dirsrv/slapd-"${DS_INSTANCE_NAME}"/ldif
-DS_DB_LIB=bdb
-#DS_DB_LIB=mdb
 DNPW_FN=/root/.config/ldap/"${DS_INSTANCE_NAME}"/dnpw
-#DNPW= #actual definition at end of file
-HOST=$( hostname -f )
+LDAPI="ldapi://%2frun%2fslapd-${DS_INSTANCE_NAME}".socket
+PAM_AUTH_FN='/etc/pam.d/ldapserver'
 
 # 389ds log parsing & monitoring
 DS_LOG_DIR=/var/log/dirsrv/slapd-"${DS_INSTANCE_NAME}"
@@ -29,7 +42,6 @@ DS_VENV="${INSTALL_DIR}"/.venv
 DS_PY3="${DS_VENV}"/bin/python3
 
 # certificate related
-EMAIL=ldap-admin@lists.ncsa.illinois.edu
 LETSENCRYPT_BASE=/etc/letsencrypt
 CERT_DIR="${LETSENCRYPT_BASE}"/live/"${HOST}"
 HOST_KEY="${CERT_DIR}"/privkey.pem
@@ -46,7 +58,6 @@ LDAPMODIFY=/usr/bin/ldapmodify
 
 # replication settings
 REPLPW_FN=/root/.config/ldap/"${DS_INSTANCE_NAME}"/replpw
-#REPLPW= #actual definition at end of file
 REPL_PORT='389'
 REPL_PROTOCOL='LDAP'
 REPL_DN='cn=replication manager,cn=config'
@@ -85,24 +96,23 @@ die() {
 
 _dsconf() {
   $DSCONF \
-    -D "cn=Directory Manager" \
-    -y "${DNPW_FN}" \
-    ldap://"${HOST}" \
+    "${DS_INSTANCE_NAME}" \
     "${@}"
 }
 
 
 _dsctl() {
-  $DSCTL "${DS_INSTANCE_NAME}" \
+  $DSCTL \
+    "${DS_INSTANCE_NAME}" \
     "${@}"
 }
 
 
 _ldapsearch() {
   $LDAPSEARCH \
-    -H ldaps://"${HOST}" \
-    -D "cn=Directory Manager" \
-    -y "${DNPW_FN}" \
+    -H "${LDAPI}" \
+    -Y EXTERNAL \
+  | -LLL \
     "${@}"
 }
 
@@ -110,24 +120,8 @@ _ldapsearch() {
 _ldapmodify() {
   # reads ldif from stdin, pipe or redirect to this function
   $LDAPMODIFY \
-    -H ldaps://"${HOST}" \
-    -D "cn=Directory Manager" \
-    -y "${DNPW_FN}" \
-    -x
-}
-
-
-dump_config() {
-  _ldapsearch \
-    -LLx \
-    -b 'cn=config'
-}
-
-
-get_replication_config() {
-  _ldapsearch \
-    -LLx \
-    -b 'cn=mapping tree,cn=config'
+    -H "${LDAPI}" \
+    -Y EXTERNAL
 }
 
 
