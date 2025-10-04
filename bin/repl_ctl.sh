@@ -91,7 +91,7 @@ add_ra() {
 }
 
 
-add_ra_to_dsrc() {
+update_dsrc() {
   DSRC=~/.dsrc
   grep -q '[repl-monitor-connections]' "${DSRC}" || {
     echo '[repl-monitor-connections]' >> "${DSRC}"
@@ -104,64 +104,21 @@ ENDHERE
 }
 
 
-del_ra() {
-  validate_cn || die "${LAST_ERR_MSG}"
-  _dsconf \
-    repl-agmt delete \
+do_ra_action() {
+  local _action="${1}"
+  local _repl_cn="${2}" #not always needed, such as for list
+  _dsconf repl-agmt "${_action}" \
     --suffix "${DS_SUFFIX}" \
-    "${REPL_CN}"
+    "${_repl_cn}"
 }
 
 
-init_ra() {
-  validate_cn || die "${LAST_ERR_MSG}"
-  _dsconf \
-    repl-agmt init \
-    --suffix "${DS_SUFFIX}" \
-    "${REPL_CN}"
-}
-
-
-pause_ra() {
-  validate_cn || die "${LAST_ERR_MSG}"
-  _dsconf \
-    repl-agmt disable \
-    --suffix "${DS_SUFFIX}" \
-    "${REPL_CN}"
-}
-
-
-resume_ra() {
-  validate_cn || die "${LAST_ERR_MSG}"
-  _dsconf \
-    repl-agmt enable \
-    --suffix "${DS_SUFFIX}" \
-    "${REPL_CN}"
-}
-
-
-poke_ra() {
-  validate_cn || die "${LAST_ERR_MSG}"
-  _dsconf \
-    repl-agmt poke \
-    --suffix "${DS_SUFFIX}" \
-    "${REPL_CN}"
-}
-
-
-list_all() {
-  _dsconf \
-    repl-agmt list \
-    --suffix "${DS_SUFFIX}"
-}
-
-
-list_ra() {
-  validate_cn || die "${LAST_ERR_MSG}"
-  _dsconf \
-    repl-agmt get \
-    --suffix "${DS_SUFFIX}" \
-    "${REPL_CN}"
+get_all_ra_statuses() {
+  _dsconf repl-agmt list --suffix "${DS_SUFFIX}" \
+  | awk '/^cn: / {print $NF}' \
+  | while read; do
+      do_ra_action status "${REPLY}"
+    done
 }
 
 
@@ -176,7 +133,7 @@ ${PRG} [OPTIONS] <ACTION>
     --pwd <PWD>    replication manager password (as defined on HOST)
 
   ACTIONS
-      add, delete, pause, resume, init, poke, list 
+    add, delete, get, init, poke, disable, enable, list
 
   NOTES:
     * if CN is not specified, create as 'replication_agreement_<FQDN>'
@@ -223,6 +180,7 @@ while [[ $# -gt 0 ]] && [[ $ENDWHILE -eq 0 ]] ; do
 done
 
 ACTION="${1}"
+shift
 
 # this is common to every action, so just call it here
 #mk_dn
@@ -230,28 +188,23 @@ ACTION="${1}"
 case "${ACTION}" in
   add)
     add_ra
-    # add_ra_to_dsrc
+    update_dsrc
     ;;
-  del | delete | rm | remove)
-    del_ra
-    ;;
-  pause)
-    pause_ra
-    ;;
-  resume)
-    resume_ra
-    ;;
-  init | initialize)
-    init_ra
-    ;;
-  poke)
-    poke_ra
+  delete | init | poke | disable | enable | get)
+    # all these commands require a valid valid REPL_CN
+    validate_cn || die "${LAST_ERR_MSG}"
+    do_ra_action "${ACTION}" "${REPL_CN}"
     ;;
   list)
-    if [[ "${REPL_FQDN_IS_VALID}" -eq ${YES} ]] ; then
-      list_ra
+    # list doesn't need a REPL_CN, lists all agreements
+    do_ra_action "${ACTION}"
+    ;;
+  status)
+    if [[ "${REPL_CN_IS_VALID}" -eq ${YES} ]] ; then
+      # if --host or --cn were given, then user requested just that one
+      do_ra_action "${ACTION}" "${REPL_CN}"
     else
-      list_all
+      get_all_ra_statuses
     fi
     ;;
   *)

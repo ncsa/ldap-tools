@@ -1,26 +1,10 @@
-YES=0
-NO=1
 
-# USER SETTINGS
-
-PAM_AUTH=$NO # set to either YES or NO
-
-DS_DB_LIB=bdb # either bdb or mdb
-
-DS_INSTANCE_NAME=ncsa-test-ldap # this is freetext, leave alone or remove "test"
-
-EMAIL=ldap-admin@lists.ncsa.illinois.edu
-
-# ==================================
-# END OF USER CONFIGURABLE SETTINGS
-# CHANGE NOTHING MORE BELOW HERE
-# ==================================
-
+INSTALL_DIR='___INSTALL_DIR___'
+. "${INSTALL_DIR}"/conf/config
 
 # general settings
-INSTALL_DIR='___INSTALL_DIR___'
-VERBOSE=$YES
-DEBUG=$YES
+YES=0
+NO=1
 # ANSI escape codes for colors
 GREEN='\033[0;32m'
 RED='\033[0;31m'
@@ -28,7 +12,6 @@ NC='\033[0m'  # No Color
 HOST=$( hostname -f )
 
 # 389ds settings
-DS_SUFFIX='dc=ncsa,dc=illinois,dc=edu'
 DS_SERVER_INF=/root/.config/ldap/"${DS_INSTANCE_NAME}"/"${DS_INSTANCE_NAME}".inf
 DS_LIB_DIR=/var/lib/dirsrv/slapd-"${DS_INSTANCE_NAME}"
 DS_LDIF_DIR=/var/lib/dirsrv/slapd-"${DS_INSTANCE_NAME}"/ldif
@@ -58,8 +41,6 @@ LDAPMODIFY=/usr/bin/ldapmodify
 
 # replication settings
 REPLPW_FN=/root/.config/ldap/"${DS_INSTANCE_NAME}"/replpw
-REPL_PORT='389'
-REPL_PROTOCOL='LDAP'
 REPL_DN='cn=replication manager,cn=config'
 
 

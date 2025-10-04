@@ -45,7 +45,7 @@ set_install_dir() {
 
 install_subdirs() {
   [[ $DEBUG -eq $YES ]] && set -x
-  local _dirs=( bin files live lib lap )
+  local _dirs=( bin conf files lib lap )
   local _base_len
   let "_base_len = ${#BASE} + 1"
 
@@ -78,14 +78,15 @@ install_subdirs() {
 mk_symlinks() {
   [[ $DEBUG -eq $YES ]] && set -x
   declare -A _links=(
-    [stop]=serverctl
-    [start]=serverctl
-    [restart]=serverctl
-    [status]=serverctl
-    [dsconf]=dsc
-    [dsctl]=dsc
-    [ldapsearch]=dsc
-    [ldapmodify]=dsc
+    ["${INSTALL_DIR}"/bin/stop]="${INSTALL_DIR}"/bin/serverctl
+    ["${INSTALL_DIR}"/bin/start]="${INSTALL_DIR}"/bin/serverctl
+    ["${INSTALL_DIR}"/bin/restart]="${INSTALL_DIR}"/bin/serverctl
+    ["${INSTALL_DIR}"/bin/status]="${INSTALL_DIR}"/bin/serverctl
+    ["${INSTALL_DIR}"/bin/dsconf]="${INSTALL_DIR}"/bin/dsc
+    ["${INSTALL_DIR}"/bin/dsctl]="${INSTALL_DIR}"/bin/dsc
+    ["${INSTALL_DIR}"/bin/ldapsearch]="${INSTALL_DIR}"/bin/dsc
+    ["${INSTALL_DIR}"/bin/ldapmodify]="${INSTALL_DIR}"/bin/dsc
+    ["${INSTALL_DIR}"/conf/config]="${INSTALL_DIR}"/conf/example
   )
 
   for k in "${!_links[@]}"; do
