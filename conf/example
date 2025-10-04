@@ -1,0 +1,32 @@
+### INSTRUCTIONS ###
+# 1. Make a copy of this file in ~/.config/ldap/<DS_INSTANCE_NAME>/config
+# 2. Edit key values for your specific use case.
+# 3. Update the symlink
+# "INSTALL_DIR/ldap-tools/conf/config" -> ~/.config/ldap/<DS_INSTANCE_NAME>/config
+###
+
+YES=0   #no touchee
+NO=1    #no touchee
+
+# ======================
+# START OF USER SETTINGS
+# ======================
+
+PAM_AUTH=$NO # set to either YES or NO
+
+DS_DB_LIB=bdb # either bdb or mdb
+
+DS_INSTANCE_NAME=ncsa-test-ldap # this is freetext, leave alone or remove "test"
+
+DS_SUFFIX='dc=ncsa,dc=illinois,dc=edu' # the base of all ldap contents
+
+# replication settings
+REPL_PORT='389'
+REPL_PROTOCOL='LDAP'
+
+# anything that sends mail will be configured to send here
+EMAIL=ldap-admin@lists.ncsa.illinois.edu
+
+# controls output from the various scripts
+VERBOSE=$YES
+DEBUG=$YES
