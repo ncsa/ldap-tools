@@ -11,7 +11,7 @@ AUTO_YES=${NO}
 
 dump_db() {
   local _ts_start=$SECONDS
-  _dsctl db2ldif --replication userRoot
+  _dsctl db2ldif userRoot
   local _ts_end=$SECONDS
   local _elapsed=$( bc <<< "$_ts_end - $_ts_start" )
   echo "Database backup took: ${_elapsed} secs"

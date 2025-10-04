@@ -29,7 +29,7 @@ ldap_start() {
 
 dump_db() {
   local _start=$SECONDS
-  "${DB2LDIF}" -r -s "${LDAP_SUFFIX}" 
+  "${DB2LDIF}" -s "${LDAP_SUFFIX}" 
   local _end=$SECONDS
   local _elapsed=$( bc <<< "$_end - $_start" )
   echo "DB backup took: $_elapsed secs"
