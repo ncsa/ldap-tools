@@ -75,6 +75,7 @@ validate_cn() {
 
 
 add_ra() {
+  [[ $DEBUG -eq $YES ]] && set -x
   validate_fqdn || die "${LAST_ERR_MSG}"
   validate_cn || die "${LAST_ERR_MSG}"
   validate_passwd || die "${LAST_ERR_MSG}"
@@ -92,6 +93,7 @@ add_ra() {
 
 
 update_dsrc() {
+  [[ $DEBUG -eq $YES ]] && set -x
   DSRC=~/.dsrc
   grep -q '[repl-monitor-connections]' "${DSRC}" || {
     echo '[repl-monitor-connections]' >> "${DSRC}"
@@ -105,15 +107,17 @@ ENDHERE
 
 
 do_ra_action() {
+  [[ $DEBUG -eq $YES ]] && set -x
   local _action="${1}"
   local _repl_cn="${2}" #not always needed, such as for list
   _dsconf repl-agmt "${_action}" \
     --suffix "${DS_SUFFIX}" \
-    "${_repl_cn}"
+    ${_repl_cn}
 }
 
 
 get_all_ra_statuses() {
+  [[ $DEBUG -eq $YES ]] && set -x
   _dsconf repl-agmt list --suffix "${DS_SUFFIX}" \
   | awk '/^cn: / {print $NF}' \
   | while read; do
@@ -153,6 +157,8 @@ ENDHERE
 ###
 # MAIN
 ###
+
+[[ $DEBUG -eq $YES ]] && set -x
 
 # Process options
 ENDWHILE=0
