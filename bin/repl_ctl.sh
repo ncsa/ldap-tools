@@ -137,7 +137,7 @@ ${PRG} [OPTIONS] <ACTION>
     --pwd <PWD>    replication manager password (as defined on HOST)
 
   ACTIONS
-    add, delete, get, init, poke, disable, enable, list
+    add, delete, get, init, poke, disable, enable, list, status
 
   NOTES:
     * if CN is not specified, create as 'replication_agreement_<FQDN>'
