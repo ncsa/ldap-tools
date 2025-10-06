@@ -36,8 +36,7 @@ dump_db() {
 
   local _ldif_out_fn=$( ls -t "${LDIF_DIR}" | head -1)
   local _src="${LDIF_DIR}"/"${_ldif_out_fn}"
-  local _tgt=/tmp/replcheck_"${HOST}"."${_ldif_out_fn}"
-  # ln -s -r "${LDIF_DIR}"/"${_ldif_out_fn}" "${LDIF_DIR}"/replcheck_${HOST}.ldif
+  local _tgt=/tmp/replcheck."${_ldif_out_fn}"
   mv "${_src}" "${_tgt}"
   chmod o+r "${_tgt}"
   echo "Bkup LDIF file: '${_tgt}'"
@@ -47,15 +46,14 @@ dump_db() {
 }
 
 
-
 ###
 # MAIN
 ###
 
 purge_old
 
-ldap_stop
+# ldap_stop
 
 dump_db
 
-ldap_start
+# ldap_start

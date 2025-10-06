@@ -124,13 +124,18 @@ while [[ $# -gt 0 ]] && [[ $ENDWHILE -eq ${NO} ]] ; do
   shift
 done
 
+get_ds_version
+if [[ "${DS_VERSION}" -ge 12 ]] ; then
+  OFFLINE=${YES}
+fi
+
 [[ ${OFFLINE} -eq ${YES} && ${AUTO_YES} -ne ${YES} ]] \
 && continue_or_exit "DS389 will be stopped during the backup. Continue?"
 
 purge_old
 
-# [[ ${OFFLINE} -eq ${YES} ]] && stop_service
+[[ ${OFFLINE} -eq ${YES} ]] && stop_service
 
 dump_db
 
-# [[ ${OFFLINE} -eq ${YES} ]] && start_service
+[[ ${OFFLINE} -eq ${YES} ]] && start_service
