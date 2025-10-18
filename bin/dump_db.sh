@@ -28,10 +28,12 @@ db_dumper() {
   echo "Database backup took: ${_elapsed} secs"
 
   local _ldif_out_fn=$( ls -t "${DS_LDIF_DIR}" | head -1)
-  [[ -f "${_ldif_out_fn}" ]] || die "unable to find db dump ldif"
+  local _ldif="${DS_LDIF_DIR}"/"${_ldif_out_fn}"
+  [[ -f "${_ldif}" ]] || die "unable to find db dump ldif"
 
-  local _src="${DS_LDIF_DIR}"/"${_ldif_out_fn}"
-  local _tgt=/tmp/replcheck."${_ldif_out_fn}"
+  local _src="${_ldif}"
+  # local _tgt=/tmp/replcheck."${_ldif}"
+  local _tgt=/tmp/replcheck.ldif
   mv "${_src}" "${_tgt}"
   chmod o+r "${_tgt}"
   echo  "Bkup LDIF: '${_tgt}'"
@@ -54,20 +56,22 @@ dump_db() {
 
 
 stop_service() {
-  if [[ "${DS_VERSION}" -eq 10 ]] ; then
-    systemctl stop "${LDAP_SERVICE_NAME}"
-  else
-    _dsctl stop
-  fi
+  # if [[ "${DS_VERSION}" -eq 10 ]] ; then
+  #   systemctl stop "${LDAP_SERVICE_NAME}"
+  # else
+  #   _dsctl stop
+  # fi
+  : pass
 }
 
 
 start_service() {
-  if [[ "${DS_VERSION}" -eq 10 ]] ; then
-    systemctl start "${LDAP_SERVICE_NAME}"
-  else
-    _dsctl start
-  fi
+  # if [[ "${DS_VERSION}" -eq 10 ]] ; then
+  #   systemctl start "${LDAP_SERVICE_NAME}"
+  # else
+  #   _dsctl start
+  # fi
+  : pass
 }
 
 
@@ -136,6 +140,7 @@ purge_old
 
 [[ ${OFFLINE} -eq ${YES} ]] && stop_service
 
-dump_db
+# dump_db
+dump_ldapsearch
 
 [[ ${OFFLINE} -eq ${YES} ]] && start_service
