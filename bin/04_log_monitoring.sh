@@ -41,6 +41,14 @@ install_lap() {
 }
 
 
+install_jq() {
+  local _url=https://github.com/jqlang/jq/releases/download/jq-1.8.1/jq-linux-amd64
+  local _outfile="${INSTALL_DIR}"/bin/jq "${_url}"
+  curl -L -o "${_outfile}" "${_url}"
+  chmod +x "${_outfile}"
+}
+
+
 setup_venv() {
   local _system_py3=$( which python3 )
 
@@ -75,6 +83,8 @@ cleanup() {
 install_go
 
 install_lap
+
+install_jq
 
 setup_venv
 
