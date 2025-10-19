@@ -45,11 +45,17 @@ set_install_dir() {
 
 install_subdirs() {
   [[ $DEBUG -eq $YES ]] && set -x
-  local _dirs=( bin conf files lib lap )
+  declare -A _dir_modes=(
+    [bin]='0755'
+    [conf]='0644'
+    [files]='0644'
+    [lib]='0644'
+    [lap]='0644'
+  )
   local _base_len
   let "_base_len = ${#BASE} + 1"
 
-  for dir in "${_dirs[@]}"; do
+  for dir in "${!_dir_modes[@]}"; do
 
     # make target dirs
     for tgt in $( find "${BASE}"/"${dir}" -type d ); do
@@ -67,6 +73,7 @@ install_subdirs() {
         --compare \
         --verbose \
         --suffix="${TS}" \
+        --mode="${_dir_modes[$dir]}" \
         -t "${INSTALL_DIR}"/"${_subd}" \
         "${file}"
     done
