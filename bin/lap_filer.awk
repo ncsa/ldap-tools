@@ -35,5 +35,5 @@ function mk_outfn( json ) {
     close( outfn )
     outfn = new_outfn
   }
-  print >outfn
+  print >>outfn
 }
