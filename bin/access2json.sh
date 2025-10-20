@@ -8,8 +8,8 @@ INSTALL_DIR='___INSTALL_DIR___'
 
 PRG=$( basename "$0" )
 LAP="${INSTALL_DIR}"/bin/lap
-OUTDIR=/var/log/dirsrv/slapd-ldap/post_processed_logs
-ACCESS_LOGDIR=/var/log/dirsrv/slapd-ldap
+ACCESS_LOGDIR=/var/log/dirsrv/slapd-"${DS_INSTANCE_NAME}"
+OUTDIR=/var/log/dirsrv/slapd-"${DS_INSTANCE_NAME}"/post_processed_logs
 ACCESS_LOGS=()
 DEBUG=$NO
 
