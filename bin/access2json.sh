@@ -69,7 +69,7 @@ get_access_logs() {
     # check file hasn't been processed yet
     _tgt_fn=$( mk_outfn "${infile}" )
     if [[ -f "${_tgt_fn}" ]] ; then
-      echo "skipping input file '${infile}', output file '${_tgt_fn}' alread exists" 1>&2
+      echo "skipping input file '${infile}', output file '${_tgt_fn}' already exists" 1>&2
       continue
     fi
     ACCESS_LOGS+=( "${infile}" )
@@ -85,14 +85,11 @@ process_logs() {
   for infile in "${ACCESS_LOGS[@]}"; do
     local _outfn=$( mk_outfn "${infile}" )
     _start=$SECONDS
-    #"${LAP}" "${infile}" >> "${_outfn}"
-    local _action
-    local _redirect ; _redirect='>>'
-    [[ $DEBUG -eq $YES ]] && {
-      _action='echo'
-      _redirect='redirected to'
-    }
-    ${_action} "${LAP}" "${infile}" ${_redirect} "${_outfn}"
+    if [[ $DEBUG -eq $YES ]] ; then
+      echo "Would have run ${LAP} '${infile}' -> '${_outfn}'"
+    else
+      "${LAP}" "${infile}" >> "${_outfn}"
+    fi
     _end=$SECONDS
     _elapsed=$( bc <<< "${_end} - ${_start}" )
     echo "Processed '${infile}' in ${_elapsed} secs"
