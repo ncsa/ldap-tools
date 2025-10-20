@@ -49,7 +49,7 @@ mk_outfn() {
   local _infile
   local _pfx
   _infile="${1}"
-  _pfx=$( echo "${_infile}" | cut -c -15 )
+  _pfx=$( basename "${_infile}" | cut -c -15 )
   echo "${OUTDIR}"/"${_pfx}".json
 }
 
