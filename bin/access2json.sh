@@ -29,6 +29,7 @@ validate_file() {
     LAST_ERR_MSG="File is 0 size: '${_fn}'"
     return ${NO}
   }
+  return ${YES}
 }
 
 
@@ -60,12 +61,11 @@ get_access_logs() {
   local _tgt_fn
   _raw_logs=( $( ls "${ACCESS_LOGDIR}"/access.[0-9]* ) )
   for infile in "${_raw_logs[@]}"; do
-    _fn_ok=$( validate_file "${infile}" )
     # check file is valid
-    if [[ $_fn_ok -eq $YES ]] ; then
+    validate_file "${infile}" || {
       echo "skipping input file '${infile}', ${LAST_ERR_MSG}" 1>&2
       continue
-    fi
+    }
     # check file hasn't been processed yet
     _tgt_fn=$( mk_outfn "${infile}" )
     if [[ -f "${_tgt_fn}" ]] ; then
