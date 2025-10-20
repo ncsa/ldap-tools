@@ -1,65 +1,18 @@
 #!/bin/bash
 
+# Post-process completed ds389 access logs into a more usable JSON format.
+# This script was designed to be run from cron.
+
 INSTALL_DIR='___INSTALL_DIR___'
 . "${INSTALL_DIR}"/lib/ds_lib.sh
 
 PRG=$( basename "$0" )
-
 LAP="${INSTALL_DIR}"/bin/lap
-JQ="${INSTALL_DIR}"/bin/jq
 OUTDIR=/var/log/dirsrv/slapd-ldap/post_processed_logs
-TMP="${OUTDIR}"/lap_output.json
 ACCESS_LOGDIR=/var/log/dirsrv/slapd-ldap
-FN_PFX=
-OUTFN=_access_log.json
-DEBUG=$YES
+ACCESS_LOGS=()
+DEBUG=$NO
 
-
-process_logs() {
-  [[ $DEBUG -eq $YES ]] && set -x
-  local _start
-  local _end
-  local _elapsed
-  >"${TMP}"
-  for f in "${@}"; do
-    _start=$SECONDS
-    "${LAP}" "${f}" >> "${TMP}"
-    _end=$SECONDS
-    _elapsed=$( bc <<< "${_end} - ${_start}" )
-    echo "Processed '$f' in ${_elapsed} secs"
-  done
-  ls -l "${TMP}"
-}
-
-
-mk_fn_date_pfx() {
-  [[ $DEBUG -eq $YES ]] && set -x
-  # make a filename prefix using the last timestamp from LAP json output
-  local _ts=$( tail -1 "${TMP}" \
-    | "${JQ}" '.time[:20] | strptime("%d/%b/%Y:%H:%M:%S") | mktime'
-  )
-  FN_PFX=$( date -d @"${_ts}" +%Y%m%dT%H%M%S )
-}
-
-
-validate_outdir() {
-  [[ $DEBUG -eq $YES ]] && set -x
-  [[ -d "${OUTDIR}" ]] || {
-    LAST_ERR_MSG="Directory not found: '${OUTDIR}'"
-    return ${NO}
-  }
-  return ${YES}
-}
-
-
-validate_prefix() {
-  [[ $DEBUG -eq $YES ]] && set -x
-  [[ -z "${FN_PFX}" ]] && {
-    LAST_ERR_MSG='Prefix cannot be empty'
-    return ${NO}
-  }
-  return ${YES}
-}
 
 validate_file() {
   [[ $DEBUG -eq $YES ]] && set -x
@@ -79,6 +32,74 @@ validate_file() {
 }
 
 
+validate_dir() {
+  [[ $DEBUG -eq $YES ]] && set -x
+  local _dir="${1}"
+  [[ -d "${_dir}" ]] || {
+    LAST_ERR_MSG="Directory not found: '${_dir}'"
+    return ${NO}
+  }
+  return ${YES}
+}
+
+
+mk_outfn() {
+  [[ $DEBUG -eq $YES ]] && set -x
+  local _infile
+  local _pfx
+  _infile="${1}"
+  _pfx=$( echo "${_infile}" | cut -c -15 )
+  echo "${OUTDIR}"/"${_pfx}".json
+}
+
+
+get_access_logs() {
+  [[ $DEBUG -eq $YES ]] && set -x
+  local _raw_logs
+  local _fn_ok
+  local _tgt_fn
+  _raw_logs=( $( ls "${ACCESS_LOGDIR}"/access.[0-9]* ) )
+  for infile in "${_raw_logs[@]}"; do
+    _fn_ok=$( validate_file "${infile}" )
+    # check file is valid
+    if [[ $_fn_ok -eq $YES ]] ; then
+      echo "skipping input file '${infile}', ${LAST_ERR_MSG}" 1>&2
+      continue
+    fi
+    # check file hasn't been processed yet
+    _tgt_fn=$( mk_outfn "${infile}" )
+    if [[ -f "${_tgt_fn}" ]] ; then
+      echo "skipping input file '${infile}', output file '${_tgt_fn}' alread exists" 1>&2
+      continue
+    fi
+    ACCESS_LOGS+=( "${infile}" )
+  done
+}
+
+
+process_logs() {
+  [[ $DEBUG -eq $YES ]] && set -x
+  local _start
+  local _end
+  local _elapsed
+  for infile in "${ACCESS_LOGS[@]}"; do
+    local _outfn=$( mk_outfn "${infile}" )
+    _start=$SECONDS
+    #"${LAP}" "${infile}" >> "${_outfn}"
+    local _action
+    local _redirect ; _redirect='>>'
+    [[ $DEBUG -eq $YES ]] && {
+      _action='echo'
+      _redirect='redirected to'
+    }
+    ${_action} "${LAP}" "${infile}" ${_redirect} "${_outfn}"
+    _end=$SECONDS
+    _elapsed=$( bc <<< "${_end} - ${_start}" )
+    echo "Processed '${infile}' in ${_elapsed} secs"
+  done
+}
+
+
 print_usage() {
   echo
   cat <<ENDHERE
@@ -87,12 +108,13 @@ Process raw ds389 access logs into useful JSON format.
 ${PRG} [OPTIONS] <accesslogfile> [accesslogfile]...
   OPTIONS
     -h | --help
+    -d | --debug
+    -a | --access_log_dir <DIR>
+            Location of ds389 raw access logs
+            Default: '${ACCESS_LOGDIR}'
     -o | --outdir <DIR>
             Where to write JSON output files
             Default: '${OUTDIR}'
-    -p | --prefix <PREFIX>
-            Output file prefix
-            Default: use the date prefix from the first input file
 
   NOTES:
     * Works best when the ds389 access log is rotated daily at midnight
@@ -111,13 +133,14 @@ ENDWHILE=0
 while [[ $# -gt 0 ]] && [[ $ENDWHILE -eq 0 ]] ; do
   case $1 in
     -h | --help) print_usage; exit 0;;
+    -d | --debug) DEBUG=$YES;;
+    -a | --access_log_dir)
+      ACCESS_LOGDIR="$2"
+      validate_dir "${ACCESS_LOGDIR}" || die "${LAST_ERR_MSG}"
+      shift;;
     -o | --outdir)
       OUTDIR="$2"
-      validate_outdir || die "${LAST_ERR_MSG}"
-      shift;;
-    -p | --prefix)
-      FN_PFX="$2"
-      validate_prefix || die "${LAST_ERR_MSG}"
+      validate_dir "${OUTDIR}" || die "${LAST_ERR_MSG}"
       shift;;
     --) ENDWHILE=1;;
     -*) echo "Invalid option '$1'"; exit 1;;
@@ -126,17 +149,6 @@ while [[ $# -gt 0 ]] && [[ $ENDWHILE -eq 0 ]] ; do
   shift
 done
 
-# Validate input files
-[[ $# < 1 ]] && die "missing input filenames"
-for fn in "${@}" ; do
-  validate_file "${fn}" || die "${LAST_ERR_MSG}"
-done
+get_access_logs
 
-
-process_logs "${@}"
-
-[[ -z "${FN_PFX}" ]] && mk_fn_date_pfx "${1}"
-
-final_outfn="${OUTDIR}"/"${FN_PFX}"_"${OUTFN}"
-mv "${TMP}" "${final_outfn}"
-ll "${final_outfn}"
+process_logs
