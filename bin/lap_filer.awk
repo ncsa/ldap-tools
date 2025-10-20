@@ -1,7 +1,7 @@
 #!/usr/bin/awk -f
 
 BEGIN {
-  INSTALL_DIR = "/root/ldap-tools"
+  INSTALL_DIR = "___INSTALL_DIR___"
   JQ = INSTALL_DIR "/bin/jq"
   LOGDIRBASE = "/var/log/dirsrv"
   outfn = ""
