@@ -61,6 +61,13 @@ err() {
   echo -e "${RED}✗ ERROR: $*${NC}" #| tee /dev/stderr
 }
 
+
+info() {
+  [[ $VERBOSE -eq $YES ]] && {
+    echo -e "${RED}INFO: ${NC}$*" 1>&2
+  }
+}
+
  
 success() {
   echo -e "${GREEN}✓ $*${NC}" #| tee /dev/stderr

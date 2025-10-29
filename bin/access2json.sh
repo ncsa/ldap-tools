@@ -12,6 +12,7 @@ ACCESS_LOGDIR=/var/log/dirsrv/slapd-"${DS_INSTANCE_NAME}"
 OUTDIR=/var/log/dirsrv/slapd-"${DS_INSTANCE_NAME}"/post_processed_logs
 ACCESS_LOGS=()
 DEBUG=$NO
+VERBOSE=$NO
 
 
 validate_file() {
@@ -69,7 +70,7 @@ get_access_logs() {
     # check file hasn't been processed yet
     _tgt_fn=$( mk_outfn "${infile}" )
     if [[ -f "${_tgt_fn}" ]] ; then
-      echo "skipping input file '${infile}', output file '${_tgt_fn}' already exists" 1>&2
+      info "skipping input file '${infile}', output file '${_tgt_fn}' already exists"
       continue
     fi
     ACCESS_LOGS+=( "${infile}" )
@@ -106,6 +107,7 @@ ${PRG} [OPTIONS] <accesslogfile> [accesslogfile]...
   OPTIONS
     -h | --help
     -d | --debug
+    -v | --verbose  (tell about skipped files)
     -a | --access_log_dir <DIR>
             Location of ds389 raw access logs
             Default: '${ACCESS_LOGDIR}'
@@ -130,7 +132,11 @@ ENDWHILE=0
 while [[ $# -gt 0 ]] && [[ $ENDWHILE -eq 0 ]] ; do
   case $1 in
     -h | --help) print_usage; exit 0;;
-    -d | --debug) DEBUG=$YES;;
+    -v | --verbose) VERBOSE=$YES;;
+    -d | --debug)
+      VERBOSE=$YES
+      DEBUG=$YES
+      ;;
     -a | --access_log_dir)
       ACCESS_LOGDIR="$2"
       validate_dir "${ACCESS_LOGDIR}" || die "${LAST_ERR_MSG}"
