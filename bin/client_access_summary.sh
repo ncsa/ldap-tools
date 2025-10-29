@@ -8,7 +8,7 @@ BIN="${INSTALL_DIR}"/bin
 JQ="${BIN}"/jq
 OUTDIR=/var/log/dirsrv/slapd-ldap/post_processed_logs
 TMP="${OUTDIR}"/client_access_summary_tmp.json
-DEBUG=$YES
+DEBUG=$NO
 
 
 count_client_actions() {
@@ -58,6 +58,7 @@ Count unique actions per client in a JSON access log.
 ${PRG} [OPTIONS] <FILE1> [FILE2]...
   OPTIONS
     -h | --help
+    -d | --debug
 ENDHERE
   echo
 }
@@ -73,6 +74,7 @@ ENDWHILE=0
 while [[ $# -gt 0 ]] && [[ $ENDWHILE -eq 0 ]] ; do
   case $1 in
     -h | --help) print_usage; exit 0;;
+    -d | --debug) DEBUG=$YES;;
     --) ENDWHILE=1;;
     -*) echo "Invalid option '$1'"; exit 1;;
      *) ENDWHILE=1; break;;
