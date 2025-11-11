@@ -45,11 +45,17 @@ set_install_dir() {
 
 install_subdirs() {
   [[ $DEBUG -eq $YES ]] && set -x
-  local _dirs=( bin files live lib lap )
+  declare -A _dir_modes=(
+    [bin]='0755'
+    [conf]='0644'
+    [files]='0644'
+    [lib]='0644'
+    [lap]='0644'
+  )
   local _base_len
   let "_base_len = ${#BASE} + 1"
 
-  for dir in "${_dirs[@]}"; do
+  for dir in "${!_dir_modes[@]}"; do
 
     # make target dirs
     for tgt in $( find "${BASE}"/"${dir}" -type d ); do
@@ -67,6 +73,7 @@ install_subdirs() {
         --compare \
         --verbose \
         --suffix="${TS}" \
+        --mode="${_dir_modes[$dir]}" \
         -t "${INSTALL_DIR}"/"${_subd}" \
         "${file}"
     done
@@ -78,18 +85,20 @@ install_subdirs() {
 mk_symlinks() {
   [[ $DEBUG -eq $YES ]] && set -x
   declare -A _links=(
-    [stop]=serverctl
-    [start]=serverctl
-    [restart]=serverctl
-    [status]=serverctl
-    [dsconf]=dsc
-    [dsctl]=dsc
-    [ldapsearch]=dsc
+    ["${INSTALL_DIR}"/bin/stop]="${INSTALL_DIR}"/bin/serverctl
+    ["${INSTALL_DIR}"/bin/start]="${INSTALL_DIR}"/bin/serverctl
+    ["${INSTALL_DIR}"/bin/restart]="${INSTALL_DIR}"/bin/serverctl
+    ["${INSTALL_DIR}"/bin/status]="${INSTALL_DIR}"/bin/serverctl
+    ["${INSTALL_DIR}"/bin/dsconf]="${INSTALL_DIR}"/bin/dsc
+    ["${INSTALL_DIR}"/bin/dsctl]="${INSTALL_DIR}"/bin/dsc
+    ["${INSTALL_DIR}"/bin/ldapsearch]="${INSTALL_DIR}"/bin/dsc
+    ["${INSTALL_DIR}"/bin/ldapmodify]="${INSTALL_DIR}"/bin/dsc
+    ["${INSTALL_DIR}"/conf/config]="${INSTALL_DIR}"/conf/example
   )
 
   for k in "${!_links[@]}"; do
-    src="${INSTALL_DIR}"/bin/"${_links[$k]}"
-    tgt="${INSTALL_DIR}"/bin/"${k}"
+    src="${_links[$k]}"
+    tgt="${k}"
     [[ -e "${tgt}" ]] \
     || ln -sr "${src}" "${tgt}"
   done

@@ -11,6 +11,15 @@ configure_memberof() {
   _dsconf plugin memberof \
     enable
 
+  if [[ "${DS_DB_LIB}" == 'bdb' ]] ; then
+    cat <<ENDHERE | _ldapmodify
+dn: cn=MemberOf Plugin,cn=plugins,cn=config
+changetype: modify
+replace: memberOfDeferredUpdate
+memberOfDeferredUpdate: on
+ENDHERE
+  fi
+
   # check with
   # _dsconf plugin list | grep -i memberof
   _dsconf plugin memberof status

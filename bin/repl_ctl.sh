@@ -1,45 +1,26 @@
 #!/bin/bash
 
-PRG=$( basename "$0" )
-FQDN=$( hostname -f )
-HOST=$( echo "${FQDN}" | awk -F '.' '{print $1}' )
-PASSWD_FN=/root/ldap.RootDNPwd
-LDAPMODIFY=/bin/ldapmodify
+INSTALL_DIR='___INSTALL_DIR___'
+. "${INSTALL_DIR}"/lib/ds_lib.sh
 
-YES=0
-NO=1
+PRG=$( basename "$0" )
+
 REPL_FQDN_IS_VALID=${NO}
 REPL_PASSWD_IS_VALID=${NO}
 REPL_CN_IS_VALID=${NO}
-REPL_PORT_IS_VALID=${NO}
 LAST_ERR_MSG='?'
 
-
-die() {
-  echo "ERROR: ${@}"
-  exit 1
-}
-
-
-do_ldap_modify() {
-  set -x
- "${LDAPMODIFY}" \
-   -H ldaps://"${FQDN}" \
-   -D "cn=Directory Manager" \
-   -x \
-   -y "${PASSWD_FN}"
-}
 
 
 mk_cn_from_host() {
   REPL_HOST=$( echo "${REPL_FQDN}" | awk -F '.' '{print $1}' )
-  REPL_CN="ra_${REPL_HOST}"
+  REPL_CN="replication_agreement_${REPL_HOST}"
 }
 
 
-mk_dn() {
-  REPL_DN="cn=${REPL_CN},cn=replica,cn=\"dc=ncsa,dc=illinois,dc=edu\",cn=mapping tree,cn=config"
-}
+# mk_dn() {
+#   REPL_DN="cn=${REPL_CN},cn=replica,cn=\"${DS_SUFFIX}\",cn=mapping tree,cn=config"
+# }
 
 
 validate_fqdn() {
@@ -93,89 +74,55 @@ validate_cn() {
 }
 
 
-validate_port() {
-  if [[ ${REPL_PORT_IS_VALID} -eq ${NO} ]] ; then
-    # If not set, default to 636
-    [[ -z "${#REPL_PORT}" ]] && REPL_PORT=636
-    if [[ "${#REPL_PORT}" == "636" ]] || [[ "${#REPL_PORT}" == "389" ]] ; then
-      : pass
-    else
-      LAST_ERR_MSG="invalid PORT '${LDAP_PORT}', must be 389 or 636"
-      return ${NO}
-    fi
-    REPL_PORT_IS_VALID=${YES}
-  fi
-  return ${REPL_PORT_IS_VALID}
-}
-
-
-
 add_ra() {
+  [[ $DEBUG -eq $YES ]] && set -x
   validate_fqdn || die "${LAST_ERR_MSG}"
   validate_cn || die "${LAST_ERR_MSG}"
   validate_passwd || die "${LAST_ERR_MSG}"
-  validate_port || die "${LAST_ERR_MSG}"
-  cat <<ENDHERE | do_ldap_modify
-dn: ${REPL_DN}
-changetype: add
-objectclass: top
-objectclass: nsds5replicationagreement
-cn: ${REPL_CN}
-nsds5replicahost: ${REPL_FQDN}
-nsds5replicaport: ${REPL_PORT}
-nsds5ReplicaBindDN: cn=replication manager,cn=config
-nsDS5ReplicaTransportInfo: SSL
-nsds5replicabindmethod: SIMPLE
-nsds5replicaroot: dc=ncsa,dc=illinois,dc=edu
-description: replication agreement from ${HOST} to ${REPL_HOST}
-nsds5replicacredentials: ${REPL_PASSWD}
-nsds5BeginReplicaRefresh: start
-ENDHERE
-
+  _dsconf \
+    repl-agmt create \
+    --host "${REPL_FQDN}" \
+    --port "${REPL_PORT}" \
+    --conn-protocol="${REPL_PROTOCOL}" \
+    --suffix "${DS_SUFFIX}" \
+    --bind-dn "${REPL_DN}" \
+    --bind-method SIMPLE \
+    --bind-passwd "${REPL_PASSWD}" \
+    --init "${REPL_CN}"
 }
 
 
-del_ra() {
-  validate_cn || die "${LAST_ERR_MSG}"
-  cat <<ENDHERE | do_ldap_modify
-dn: ${REPL_DN}
-changetype: delete
+update_dsrc() {
+  [[ $DEBUG -eq $YES ]] && set -x
+  DSRC=~/.dsrc
+  grep -q '[repl-monitor-connections]' "${DSRC}" || {
+    echo '[repl-monitor-connections]' >> "${DSRC}"
+  }
+  grep -q "${REPL_CN}" "${DSRC}" || {
+    cat <<ENDHERE >>"${DSRC}"
+${REPL_CN} = ${REPL_FQDN}:${REPL_PORT}:${REPL_DN}:${REPL_PASSWD}
 ENDHERE
-
-}
-
-init_ra() {
-  validate_cn || die "${LAST_ERR_MSG}"
-  cat <<ENDHERE | do_ldap_modify
-dn: ${REPL_DN}
-changetype: modify
-replace: nsds5BeginReplicaRefresh
-nsds5BeginReplicaRefresh: start
-ENDHERE
-
-}
-
-pause_ra() {
-  validate_cn || die "${LAST_ERR_MSG}"
-  cat <<ENDHERE | do_ldap_modify
-dn: ${REPL_DN}
-changetype: modify
-replace: nsds5ReplicaEnabled
-nsds5ReplicaEnabled: off
-ENDHERE
-
+  }
 }
 
 
-resume_ra() {
-  validate_cn || die "${LAST_ERR_MSG}"
-  cat <<ENDHERE | do_ldap_modify
-dn: ${REPL_DN}
-changetype: modify
-replace: nsds5ReplicaEnabled
-nsds5ReplicaEnabled: on
-ENDHERE
+do_ra_action() {
+  [[ $DEBUG -eq $YES ]] && set -x
+  local _action="${1}"
+  local _repl_cn="${2}" #not always needed, such as for list
+  _dsconf repl-agmt "${_action}" \
+    --suffix "${DS_SUFFIX}" \
+    ${_repl_cn}
+}
 
+
+get_all_ra_statuses() {
+  [[ $DEBUG -eq $YES ]] && set -x
+  _dsconf repl-agmt list --suffix "${DS_SUFFIX}" \
+  | awk '/^cn: / {print $NF}' \
+  | while read; do
+      do_ra_action status "${REPLY}"
+    done
 }
 
 
@@ -190,14 +137,17 @@ ${PRG} [OPTIONS] <ACTION>
     --pwd <PWD>    replication manager password (as defined on HOST)
 
   ACTIONS
-      add, delete, pause, resume, init
+    add, delete, get, init, poke, disable, enable, list, status
 
   NOTES:
-    * if CN is not specified, create as 'ra_<FQDN>' using short hostname
+    * if CN is not specified, create as 'replication_agreement_<FQDN>'
+      using short hostname
     * (that means any action can use --host instead of --cn)
     * if both --host and --cn are specified, last one wins
     * --host is required for "add" action
     * --pwd is required for "add" action. Otherwise it is ignored.
+    * if --host is provided for "list" action, then show all the details for that
+      repl-agmt only. Otherwise, "list" by itself will show all repl-agmt's
 ENDHERE
   echo
 }
@@ -207,6 +157,8 @@ ENDHERE
 ###
 # MAIN
 ###
+
+[[ $DEBUG -eq $YES ]] && set -x
 
 # Process options
 ENDWHILE=0
@@ -226,10 +178,6 @@ while [[ $# -gt 0 ]] && [[ $ENDWHILE -eq 0 ]] ; do
       REPL_PASSWD="$2";
       validate_passwd || die "${LAST_ERR_MSG}"
       shift;;
-    --port)
-      REPL_PORT="$2";
-      validate_port || die "${LAST_ERR_MSG}"
-      shift;;
     --) ENDWHILE=1;;
     -*) echo "Invalid option '$1'"; exit 1;;
      *) ENDWHILE=1; break;;
@@ -238,25 +186,32 @@ while [[ $# -gt 0 ]] && [[ $ENDWHILE -eq 0 ]] ; do
 done
 
 ACTION="${1}"
+shift
 
 # this is common to every action, so just call it here
-mk_dn
+#mk_dn
 
 case "${ACTION}" in
   add)
     add_ra
+    update_dsrc
     ;;
-  del | delete | rm | remove)
-    del_ra
+  delete | init | poke | disable | enable | get)
+    # all these commands require a valid valid REPL_CN
+    validate_cn || die "${LAST_ERR_MSG}"
+    do_ra_action "${ACTION}" "${REPL_CN}"
     ;;
-  pause)
-    pause_ra
+  list)
+    # list doesn't need a REPL_CN, lists all agreements
+    do_ra_action "${ACTION}"
     ;;
-  resume)
-    resume_ra
-    ;;
-  init | initialize)
-    init_ra
+  status)
+    if [[ "${REPL_CN_IS_VALID}" -eq ${YES} ]] ; then
+      # if --host or --cn were given, then user requested just that one
+      do_ra_action "${ACTION}" "${REPL_CN}"
+    else
+      get_all_ra_statuses
+    fi
     ;;
   *)
     die "unknown ACTION"

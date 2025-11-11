@@ -32,6 +32,8 @@ shift
 validate_target
 
 USER=$( whoami )
+FILTER="uid=${USER}"
+ATTRS=( loginShell email cn dn )
 
 ldapsearch \
   -H ldaps://"${TGT}".ncsa.illinois.edu:636 \
@@ -39,4 +41,6 @@ ldapsearch \
   -W \
   -x \
   -b "dc=ncsa,dc=illinois,dc=edu" \
+  "${FILTER}" \
+  "${ATTRS[@]}" \
   | tail -7

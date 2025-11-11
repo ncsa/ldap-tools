@@ -28,7 +28,7 @@
 
 ## Make replication agreements
 1. On a Supplier or a Hub:
-   1. `add_consumer.sh <CONSUMER_HOSTNAME> <REPLICATION_PWD>`
+   1. `repl_ctl.sh add --host <CONSUMER_HOSTNAME> --pwd <REPLICATION_PWD>`
       1. where REPLICATION_PWD is defined on the Consumer host in
          `/root/.config/ldap/<INSTANCE_NAME>/replpw`.
 

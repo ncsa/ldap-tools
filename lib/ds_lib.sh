@@ -1,31 +1,30 @@
-# general settings
+
 INSTALL_DIR='___INSTALL_DIR___'
+. "${INSTALL_DIR}"/conf/config
+
+# general settings
 YES=0
 NO=1
-VERBOSE=$YES
-DEBUG=$YES
 # ANSI escape codes for colors
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 NC='\033[0m'  # No Color
-
-# 389ds settings
-PAM_AUTH=$NO
-PAM_AUTH_FN='/etc/pam.d/ldapserver'
-DS_SUFFIX='dc=ncsa,dc=illinois,dc=edu'
-DS_INSTANCE_NAME=ncsa-test-ldap
-DS_SERVER_INF=/root/.config/ldap/"${DS_INSTANCE_NAME}"/"${DS_INSTANCE_NAME}".inf
-DNPW_FN=/root/.config/ldap/"${DS_INSTANCE_NAME}"/dnpw
-#DNPW= #actual definition at end of file
 HOST=$( hostname -f )
 
+# 389ds settings
+DS_SERVER_INF=/root/.config/ldap/"${DS_INSTANCE_NAME}"/"${DS_INSTANCE_NAME}".inf
+DS_LIB_DIR=/var/lib/dirsrv/slapd-"${DS_INSTANCE_NAME}"
+DS_LDIF_DIR=/var/lib/dirsrv/slapd-"${DS_INSTANCE_NAME}"/ldif
+DNPW_FN=/root/.config/ldap/"${DS_INSTANCE_NAME}"/dnpw
+LDAPI="ldapi://%2frun%2fslapd-${DS_INSTANCE_NAME}".socket
+PAM_AUTH_FN='/etc/pam.d/ldapserver'
+
 # 389ds log parsing & monitoring
-DS_LOGDIR=/var/log/dirsrv/slapd-"${DS_INSTANCE_NAME}"
+DS_LOG_DIR=/var/log/dirsrv/slapd-"${DS_INSTANCE_NAME}"
 DS_VENV="${INSTALL_DIR}"/.venv
 DS_PY3="${DS_VENV}"/bin/python3
 
 # certificate related
-EMAIL=ldap-admin@lists.ncsa.illinois.edu
 LETSENCRYPT_BASE=/etc/letsencrypt
 CERT_DIR="${LETSENCRYPT_BASE}"/live/"${HOST}"
 HOST_KEY="${CERT_DIR}"/privkey.pem
@@ -36,16 +35,37 @@ CA_NAME="LetsEncrypt CA"
 # host command paths
 DSCONF=/usr/sbin/dsconf
 DSCTL=/usr/sbin/dsctl
+LDAPSEARCH=/usr/bin/ldapsearch
+LDAPMODIFY=/usr/bin/ldapmodify
+
 
 # replication settings
 REPLPW_FN=/root/.config/ldap/"${DS_INSTANCE_NAME}"/replpw
-#REPLPW= #actual definition at end of file
-REPL_PORT='389'
-REPL_PROTOCOL='LDAP'
+REPL_DN='cn=replication manager,cn=config'
+
+
+continue_or_exit() {
+    local msg="Continue?"
+    [[ -n "$1" ]] && msg="$1"
+    echo "$msg"
+    select yn in "Yes" "No"; do
+        case $yn in
+            Yes) return 0;;
+            No ) exit 1;;
+        esac
+    done
+}
 
 
 err() {
   echo -e "${RED}✗ ERROR: $*${NC}" #| tee /dev/stderr
+}
+
+
+info() {
+  [[ $VERBOSE -eq $YES ]] && {
+    echo -e "${RED}INFO: ${NC}$*" 1>&2
+  }
 }
 
  
@@ -64,39 +84,32 @@ die() {
 
 _dsconf() {
   $DSCONF \
-    -D "cn=Directory Manager" \
-    -y "${DNPW_FN}" \
-    ldap://"${HOST}" \
+    "${DS_INSTANCE_NAME}" \
     "${@}"
 }
 
 
 _dsctl() {
-  $DSCTL "${DS_INSTANCE_NAME}" \
+  $DSCTL \
+    "${DS_INSTANCE_NAME}" \
     "${@}"
 }
 
 
 _ldapsearch() {
-  /usr/bin/ldapsearch \
-    -H ldaps://"${HOST}":636 \
-    -D "cn=Directory Manager" \
-    -y "${DNPW_FN}" \
+  $LDAPSEARCH \
+    -H "${LDAPI}" \
+    -Y EXTERNAL \
+    -LLL \
     "${@}"
 }
 
 
-dump_config() {
-  _ldapsearch \
-    -LLx \
-    -b 'cn=config'
-}
-
-
-get_replication_config() {
-  _ldapsearch \
-    -LLx \
-    -b 'cn=mapping tree,cn=config'
+_ldapmodify() {
+  # reads ldif from stdin, pipe or redirect to this function
+  $LDAPMODIFY \
+    -H "${LDAPI}" \
+    -Y EXTERNAL
 }
 
 
