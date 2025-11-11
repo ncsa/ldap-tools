@@ -11,8 +11,9 @@ set -x
 
 
 install_go() {
-  local _url=https://go.dev/dl/go1.25.0.linux-amd64.tar.gz
-  local _tgz=go1.25.0.linux-amd64.tar.gz
+  local _url _tgz
+  _url=https://go.dev/dl/go1.25.0.linux-amd64.tar.gz
+  _tgz=go1.25.0.linux-amd64.tar.gz
   [[ -d "${TMP_DIR}" ]] || {
     mkdir "${TMP_DIR}"
     pushd "${TMP_DIR}"
@@ -42,15 +43,17 @@ install_lap() {
 
 
 install_jq() {
-  local _url=https://github.com/jqlang/jq/releases/download/jq-1.8.1/jq-linux-amd64
-  local _outfile="${INSTALL_DIR}"/bin/jq "${_url}"
+  local _url _outfile
+  _url=https://github.com/jqlang/jq/releases/download/jq-1.8.1/jq-linux-amd64
+  _outfile="${INSTALL_DIR}"/bin/jq "${_url}"
   curl -L -o "${_outfile}" "${_url}"
   chmod +x "${_outfile}"
 }
 
 
 setup_venv() {
-  local _system_py3=$( which python3 )
+  local _system_py3
+  _system_py3=$( which python3 )
 
   [[ -x "${_system_py3}" ]] || die "python3 not found"
 
@@ -64,7 +67,8 @@ setup_venv() {
 
 cleanup() {
   # be explicit when deleting things
-  local _files=( go.mod go.sum lap.go lap README )
+  local _files
+  _files=( go.mod go.sum lap.go lap README )
   [[ -d "${LAP_DIR}" ]] && {
     for f in "${_files[@]}"; do
       fn="${LAP_DIR}"/"${f}"

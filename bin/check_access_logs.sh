@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# TODO - needs description and purpose
+
 INSTALL_DIR=___INSTALL_DIR___
 . "${INSTALL_DIR}"/lib/ds_lib.sh
 

@@ -1,5 +1,7 @@
 #!___INSTALL_DIR___/.venv/bin/python3
 
+# Filter and parse LDAP access events (from JSON as output by LAP)
+
 import pandas as pd
 import argparse
 import fileinput
@@ -57,7 +59,7 @@ def get_args( params=None ):
         input_filters.add_argument( '-a', '--action', action='append',
             dest = 'actions',
             choices=action_options,
-            help='''Only report on these actions.
+            help=f'''Only report on these actions.
                     Can be specified multiple times.
                 ''',
             )
@@ -69,17 +71,20 @@ def get_args( params=None ):
             dest='include_clients',
             help='''Include events from these client IPs only.
                     Can be specified multiple times.
+                    If left empty, all clients will be reported.
                 ''',
             )
         input_filters.add_argument( '-x', '--exclude_client', action='append',
             dest='exclude_clients',
             help='''Exclude events from these client IPs.
                     Can be specified multiple times.
+                    If left empty, all clients will be reported.
                 ''',
             )
         input_filters.add_argument( '-n', '--notes', action='append',
             help='''Show only logs that have this/these note codes.
                     Can be specified multiple times.
+                    See LDAP docs for valid note codes.
                 ''',
             )
         input_filters.add_argument( '-u', '--unindexed', action='store_true',
@@ -93,7 +98,7 @@ def get_args( params=None ):
             )
         input_filters.add_argument( '-A', '--after', metavar='SECS',
             type=float,
-           default=1,
+            default=1,
             help='''If --timestamp is specified,
                     only include logs that occur num SECS after TIMESTAMP.
                     Can be used alongside -B.
@@ -109,11 +114,10 @@ def get_args( params=None ):
             )
         # output format vars
         output_field_defaults = \
-            'time,client,action,etime,requests,responses'.split(',')
+            'time,client,action,etime,nentries,requests,responses'.split(',')
         output_field_options = \
             output_field_defaults + \
-            [ 'connection', 'operation', 'server', 'ssl' ] + \
-            [ 'err', 'nentries' ]
+            [ 'connection', 'operation', 'server', 'ssl', 'err' ]
         # output format options
         output_args = parser.add_argument_group( 'Output Formatting' )
         output_args.add_argument( '-f', '--field', action='append',
@@ -177,7 +181,7 @@ def get_args( params=None ):
 
 
 def get_warnings():
-    key = 'errs'
+    key = 'warnings'
     if key not in resources:
         resources[key] = []
     return resources[key]
@@ -187,7 +191,7 @@ def warn( msg ):
     ''' Log a warning to the screen and,
         Also save it in an array for later retrieval of all warnings.
     '''
-    key = 'errs'
+    key = 'warnings'
     if key not in resources:
         resources[key] = []
     resources[key].append( msg )
@@ -227,7 +231,6 @@ def timing( f ):
 def get_events():
     key = 'events'
     if key not in resources:
-        # resources[key] = nested_dict()
         resources[key] = []
     return resources[key]
 
@@ -281,14 +284,12 @@ def process_json_events():
     count = 0
     num_records = 0
     num_thousands = 0
-    # events = get_events()
     for line in fileinput.input( args.infiles ):
         num_records += 1
         if (num_records % 1000) == 0 :
             num_thousands += 1
-            # logging.info( num_thousands )
+            logging.debug( num_thousands )
         record = json.loads( line )
-        client = record['client']
         # Add custom fields and convert as needed
         fixup_record( record )
         # filter on etime
@@ -304,10 +305,10 @@ def process_json_events():
             continue
         # filter on client
         if args.include_clients:
-            if client not in args.include_clients:
+            if record['client'] not in args.include_clients:
                 continue
         if args.exclude_clients:
-            if client in args.exclude_clients:
+            if record['client'] in args.exclude_clients:
                 continue
         # filter on notes
         if args.notes:
@@ -394,6 +395,6 @@ if __name__ == '__main__':
         loglvl = logging.DEBUG
     logfmt = '%(levelname)s:%(funcName)s[%(lineno)d] %(message)s'
     logging.basicConfig( level=loglvl, format=logfmt )
-    # logging.debug( args )
+    logging.debug( args )
     # raise SystemExit( 'DEBUG EXIT' )
     run()
