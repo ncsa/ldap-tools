@@ -47,6 +47,7 @@ install_subdirs() {
   [[ $DEBUG -eq $YES ]] && set -x
   declare -A _dir_modes=(
     [bin]='0755'
+    [cron]='0755'
     [conf]='0644'
     [files]='0644'
     [lib]='0644'
@@ -83,7 +84,9 @@ install_subdirs() {
 
 
 mk_symlinks() {
-  [[ $DEBUG -eq $YES ]] && set -x
+  [[ $debug -eq $yes ]] && set -x
+  local _conf_bkup_dir _conf_bkup_file
+  _conf_bkup_dir="${HOME}"/.config/ldap
   declare -A _links=(
     ["${INSTALL_DIR}"/bin/stop]="${INSTALL_DIR}"/bin/serverctl
     ["${INSTALL_DIR}"/bin/start]="${INSTALL_DIR}"/bin/serverctl
@@ -93,8 +96,17 @@ mk_symlinks() {
     ["${INSTALL_DIR}"/bin/dsctl]="${INSTALL_DIR}"/bin/dsc
     ["${INSTALL_DIR}"/bin/ldapsearch]="${INSTALL_DIR}"/bin/dsc
     ["${INSTALL_DIR}"/bin/ldapmodify]="${INSTALL_DIR}"/bin/dsc
-    ["${INSTALL_DIR}"/conf/config]="${INSTALL_DIR}"/conf/example
+#    ["${INSTALL_DIR}"/conf/config]="${INSTALL_DIR}"/conf/example
   )
+
+  # Look for an existing config to restore
+  local _conf_bkup_dir="${HOME}"/.config/ldap
+  if [[ -d "${_conf_bkup_dir}" ]] ; then
+    _conf_bkup_file=$( find "${_conf_bkup_dir}" -type f -name config | head -1 )
+    if [[ -f "${_conf_bkup_file}" ]] ; then
+      _links["${INSTALL_DIR}"/conf/config]="${_conf_bkup_file}"
+    fi
+  fi
 
   for k in "${!_links[@]}"; do
     src="${_links[$k]}"

@@ -1,0 +1,13 @@
+[Unit]
+Description=LDAP Access Log parser
+Wants=dirsrv.target
+After=dirsrv.target
+
+[Service]
+ExecStart=___INSTALL_DIR___/bin/lap -tail ___DS_LOG_DIR___/access
+Type=exec
+Restart=always
+
+[Install]
+WantedBy=default.target
+Alias=lap.service

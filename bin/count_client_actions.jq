@@ -1,2 +1,2 @@
 include "countutils";
-counter( inputs | {client: .client, action: .action} )
+counter( inputs | fromjson? | {client: .client, action: .action} )

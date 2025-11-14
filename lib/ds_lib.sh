@@ -1,6 +1,5 @@
 
 INSTALL_DIR='___INSTALL_DIR___'
-. "${INSTALL_DIR}"/conf/config
 
 # general settings
 YES=0
@@ -11,10 +10,18 @@ RED='\033[0;31m'
 NC='\033[0m'  # No Color
 HOST=$( hostname -f )
 
+LDAP_TOOLS_CONFIG="${INSTALL_DIR}"/conf/config
+[[ -r "${LDAP_TOOLS_CONFIG}" ]] || {
+  echo "Cant read config '${LDAP_TOOLS_CONFIG}'" 1>&2
+  exit 99
+}
+. "${LDAP_TOOLS_CONFIG}"
+
 # 389ds settings
 DS_SERVER_INF=/root/.config/ldap/"${DS_INSTANCE_NAME}"/"${DS_INSTANCE_NAME}".inf
 DS_LIB_DIR=/var/lib/dirsrv/slapd-"${DS_INSTANCE_NAME}"
 DS_LDIF_DIR=/var/lib/dirsrv/slapd-"${DS_INSTANCE_NAME}"/ldif
+DSE_LDIF_FILE=/etc/dirsrv/slapd-"${DS_INSTANCE_NAME}"/dse.ldif
 DNPW_FN=/root/.config/ldap/"${DS_INSTANCE_NAME}"/dnpw
 LDAPI="ldapi://%2frun%2fslapd-${DS_INSTANCE_NAME}".socket
 PAM_AUTH_FN='/etc/pam.d/ldapserver'
@@ -38,10 +45,13 @@ DSCTL=/usr/sbin/dsctl
 LDAPSEARCH=/usr/bin/ldapsearch
 LDAPMODIFY=/usr/bin/ldapmodify
 
-
 # replication settings
 REPLPW_FN=/root/.config/ldap/"${DS_INSTANCE_NAME}"/replpw
 REPL_DN='cn=replication manager,cn=config'
+
+# custom cronjob related vars
+POST_LOG_DIR="${DS_LOG_DIR}"/post_processed_logs
+TODAY=$( date +%Y%m%d )
 
 
 continue_or_exit() {
@@ -117,6 +127,9 @@ mk_passwd() {
   tr -dc A-Za-z0-9 </dev/urandom | head -c 50
 }
 
+
+
+
 # on first run, make passwds
 [[ -f "${DNPW_FN}" ]] || {
   pw_dir="$( dirname ${DNPW_FN} )"
@@ -133,4 +146,111 @@ mk_passwd() {
   pwd_val=$(mk_passwd)
   printf "${pwd_val}" >"${REPLPW_FN}" #ensure there is no newline char
   chmod 400 "${REPLPW_FN}"
+}
+
+
+
+
+
+
+
+validate_file() {
+  [[ $DEBUG -eq $YES ]] && set -x
+  local _fn="${1}"
+  [[ -f "${_fn}" ]] || {
+    LAST_ERR_MSG="File not found: '${_fn}'"
+    return ${NO}
+  }
+  [[ -r "${_fn}" ]] || {
+    LAST_ERR_MSG="File not readable: '${_fn}'"
+    return ${NO}
+  }
+  [[ -s "${_fn}" ]] || {
+    LAST_ERR_MSG="File is 0 size: '${_fn}'"
+    return ${NO}
+  }
+  return ${YES}
+}
+
+
+validate_dir() {
+  [[ $DEBUG -eq $YES ]] && set -x
+  local _dir="${1}"
+  [[ -d "${_dir}" ]] || {
+    LAST_ERR_MSG="Directory not found: '${_dir}'"
+    return ${NO}
+  }
+  return ${YES}
+}
+
+
+json_2_outfn() {
+  # given a specific json input file, replace the .json suffix with a new suffix
+  [[ $DEBUG -eq $YES ]] && set -x
+  local _infile _new_sfx _pfx
+  _infile="${1}"
+  _new_sfx="${2}"
+  _pfx=$( basename "${_infile}" .json )
+  echo "${POST_LOG_DIR}"/"${_pfx}""${_new_sfx}"
+}
+
+
+mk_outfn() {
+  # dummy function so get_json_logs wont fail or do something unexpected
+  # Scripts calling get_json_logs must REDEFINE this function
+  # so get_json_logs wont fail
+  echo "UNIMPLEMENTED_mk_outfn_DEFAULT"
+}
+# The most common mk_outfn looks like:
+#example# mk_outfn() {
+#example#   [[ $DEBUG -eq $YES ]] && set -x
+#example#   local _infile
+#example#   _infile="${1}"
+#example#   json_2_outfn "${_infile}" '.clients.csv'
+#example# }
+
+
+get_json_logs() {
+  # List all JSON log files that might need processing
+  # Write them to the file specified by the calling script
+  # *** IMPORTANT ***
+  # *** scripts calling this must REDEFINE ---> mk_outfn() <---
+  # *** if not redefined, script will exit
+  # *** END PUBLIC SERVICE ANNOUNCEMENT
+  [[ $DEBUG -eq $YES ]] && set -x
+  local _outfn _sources _fn_ok _tgt_fn
+  _outfn="${1}"
+  [[ -z "${_outfn}" ]] && die 'missing outfn in get_json_logs'
+  >"${_outfn}" # truncate output file
+  _sources=( $( find -L "${POST_LOG_DIR}" \
+    -mindepth 1 -maxdepth 1 -type f -regextype posix-egrep \
+    -regex ".+/[0-9]{8}_access\.json" \
+    )
+  )
+  for infile in "${_sources[@]}"; do
+    # check file is valid
+    validate_file "${infile}" || {
+      info "skipping input file '${infile}', ${LAST_ERR_MSG}"
+      continue
+    }
+
+    # skip input files with today's date in the name (they are likely still
+    # being written)
+    if [[ "${infile}" == *"${TODAY}"* ]] ; then
+      info "skipping input file '${infile}', matches today's date"
+      continue
+    fi
+
+    # check file hasn't been processed yet
+    _tgt_fn=$( mk_outfn "${infile}" )
+    if [[ "${_tgt_fn}" == *"mk_outfn"* ]] ; then
+      die 'get_json_logs got unimplemented response from mk_outfn. Did you redefine mk_outfn?'
+    fi
+    if [[ -f "${_tgt_fn}" ]] ; then
+      info "skipping input file '${infile}', output file '${_tgt_fn}' already exists"
+      continue
+    fi
+
+    echo "${infile}" >>"${_outfn}"
+  done
 }

@@ -1,7 +1,9 @@
-//downloaded from
+//modified from
 //https://github.com/aidan-/ldap-access-parser
+// - remove -tail option
+// - process multiple files as args
 //license at
-//https://github.com/aidan-/ldap-access-parser/blob/master/LICENSE
+//https://github.com/rainsun/ldap-access-parser/blob/master/LICENSE
 package main
 
 import (
@@ -44,7 +46,7 @@ type Event struct {
 
 type config struct {
 	Version      *bool
-	TailFile     *bool
+	/* TailFile     *bool */
 	OutputFormat *string
 	LogFiles     *[]string
 	Output       io.Writer
@@ -105,7 +107,7 @@ func timeDuration(start string, end string) (int, error) {
 
 func init() {
 	c.Version = flag.Bool("V", false, "prints version information")
-	c.TailFile = flag.Bool("tail", false, "tail the log file to receive future events")
+	/* c.TailFile = flag.Bool("tail", false, "tail the log file to receive future events") */
 	c.OutputFormat = flag.String("format", "json", "format to output log events.  possible values are 'json' or 'xml'.")
 	c.Output = os.Stdout //configurable to help with unit testing
 
@@ -132,10 +134,10 @@ func (c config) printEvent(event Event) {
 
 func (c config) parseFile(ac map[int]Event, f string) map[int]Event {
 	tc := tail.Config{}
-	if *c.TailFile {
-		tc.Follow = true
-		tc.ReOpen = true
-	}
+	/* if *c.TailFile { */
+	/* 	tc.Follow = true */
+	/* 	tc.ReOpen = true */
+	/* } */
 
 	//open file for parsing
 	t, err := tail.TailFile(f, tc)
@@ -260,6 +262,8 @@ func main() {
 		flag.Usage()
 	}
 
-	c.parseFile(activeConnections, flag.Args()[0])
+  for _, fname := range flag.Args() {
+    c.parseFile(activeConnections, fname)
+  }
 
 }

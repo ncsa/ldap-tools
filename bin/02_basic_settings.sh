@@ -44,3 +44,6 @@ configure_memberof
 
 [[ $PAM_AUTH -eq $YES ]] \
   && configure_krb_auth
+
+
+# TODO - configure access logging for once per day

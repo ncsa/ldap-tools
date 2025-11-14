@@ -14,19 +14,20 @@ NO=1    #no touchee
 
 PAM_AUTH=$NO # set to either YES or NO
 
-DS_DB_LIB=bdb # either bdb or mdb
+DS_DB_LIB=mdb # either bdb or mdb
 
 DS_INSTANCE_NAME=ncsa-test-ldap # this is freetext, leave alone or remove "test"
 
 DS_SUFFIX='dc=ncsa,dc=illinois,dc=edu' # the base of all ldap contents
 
 # replication settings
-REPL_PORT='389'
-REPL_PROTOCOL='LDAP'
+REPL_PORT='636'
+REPL_PROTOCOL='LDAPS'
 
 # anything that sends mail will be configured to send here
 EMAIL=ldap-admin@lists.ncsa.illinois.edu
 
 # controls output from the various scripts
 VERBOSE=$YES
-DEBUG=$YES
+DEBUG=$NO
+NOOP=$NO
