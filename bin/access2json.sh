@@ -89,7 +89,7 @@ process_logs() {
     if [[ $DEBUG -eq $YES ]] ; then
       echo "Would have run ${LAP} '${infile}' -> '${_outfn}'"
     else
-      "${LAP}" "${infile}" >> "${_outfn}"
+      "${LAP}" "${infile}" > "${_outfn}"
     fi
     _end=$SECONDS
     _elapsed=$( bc <<< "${_end} - ${_start}" )
@@ -103,7 +103,7 @@ print_usage() {
   cat <<ENDHERE
 Process raw ds389 access logs into useful JSON format.
 
-${PRG} [OPTIONS] <accesslogfile> [accesslogfile]...
+${PRG} [OPTIONS]
   OPTIONS
     -h | --help
     -d | --debug
