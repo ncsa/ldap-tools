@@ -5,11 +5,12 @@ INSTALL_DIR='___INSTALL_DIR___'
 
 HOOK_DIR="${LETSENCRYPT_BASE}"/renewal-hooks
 DEPLOY_DIR="${HOOK_DIR}"/deploy
+HOOK_FILES=( $( ls *.hook.sh ) )
 
 
 mk_deploy_hooks() {
   pushd "${DEPLOY_DIR}"
-  for f in 12_certs_install.sh 13_certs_enable.sh ; do
+  for f in "${HOOK_FILES[@]}"; do
     ln -s "${INSTALL_DIR}"/bin/$f
   done
   popd

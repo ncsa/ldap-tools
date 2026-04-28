@@ -95,7 +95,7 @@ add_ra() {
 update_dsrc() {
   [[ $DEBUG -eq $YES ]] && set -x
   DSRC=~/.dsrc
-  grep -q '[repl-monitor-connections]' "${DSRC}" || {
+  grep -q -F '[repl-monitor-connections]' "${DSRC}" || {
     echo '[repl-monitor-connections]' >> "${DSRC}"
   }
   grep -q "${REPL_CN}" "${DSRC}" || {

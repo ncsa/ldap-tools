@@ -8,7 +8,7 @@ PRE_DIR="${HOOK_DIR}"/pre
 PRE_HOOK="${PRE_DIR}"/01_open_firewall_port_80.sh
 POST_DIR="${HOOK_DIR}"/post
 POST_HOOK="${POST_DIR}"/99_close_firewall_port_80.sh
-TEST=1
+TEST=$YES
 
 # Get certs
 
@@ -27,7 +27,7 @@ setup_pre_hook() {
 ENDHERE
   }
   [[ -x "${PRE_HOOK}" ]] || {
-    echo "settin pre-hook perms"
+    echo "setting pre-hook perms"
     chmod +x "${PRE_HOOK}"
   }
   echo "OK"
@@ -48,7 +48,7 @@ setup_post_hook() {
 ENDHERE
   }
   [[ -x "${POST_HOOK}" ]] || {
-    echo "settin post-hook perms"
+    echo "setting post-hook perms"
     chmod +x "${POST_HOOK}"
   }
   echo "OK"
@@ -68,7 +68,7 @@ set_email() {
 
 ## Test cert
 test_cert() {
-  TEST=1
+  TEST=$YES
   echo
   echo "Testing certbot ..."
   get_cert
@@ -76,7 +76,7 @@ test_cert() {
 
 get_cert() {
   local _test_opts=()
-  [[ $TEST -gt 0 ]] && _test_opts=( '--dry-run' '--test-cert' )
+  [[ $TEST -eq $YES ]] && _test_opts=( '--dry-run' '--test-cert' )
   set -x
   /usr/bin/certbot \
     certonly \
@@ -111,7 +111,7 @@ setup_post_hook
 set_email
 
 test_cert && {
-  unset TEST
+  TEST=$NO
   get_cert
 }
 

@@ -46,7 +46,7 @@ LDAPSEARCH=/usr/bin/ldapsearch
 LDAPMODIFY=/usr/bin/ldapmodify
 
 # replication settings
-REPLPW_FN=/root/.config/ldap/"${DS_INSTANCE_NAME}"/replpw
+REPL_PW_FN=/root/.config/ldap/"${DS_INSTANCE_NAME}"/replpw
 REPL_DN='cn=replication manager,cn=config'
 
 # custom cronjob related vars
@@ -140,12 +140,12 @@ mk_passwd() {
 }
 
 
-[[ -f "${REPLPW_FN}" ]] || {
-  pw_dir="$( dirname ${REPLPW_FN} )"
+[[ -f "${REPL_PW_FN}" ]] || {
+  pw_dir="$( dirname ${REPL_PW_FN} )"
   mkdir -p "${pw_dir}"
   pwd_val=$(mk_passwd)
-  printf "${pwd_val}" >"${REPLPW_FN}" #ensure there is no newline char
-  chmod 400 "${REPLPW_FN}"
+  printf "${pwd_val}" >"${REPL_PW_FN}" #ensure there is no newline char
+  chmod 400 "${REPL_PW_FN}"
 }
 
 
