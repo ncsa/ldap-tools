@@ -13,6 +13,15 @@ enable_tls() {
     nsslapd-security=on
 }
 
+
+configure_tls() {
+  _dsconf \
+    security set \
+    --security on \
+    --secure-port 636 \
+    --check-hostname off
+}
+
 # Enable the RSA cipher family
 # set the NSS database security device
 # and the server certificate name
@@ -42,7 +51,8 @@ ldap_restart() {
 # MAIN
 ###
 
-enable_tls
+#enable_tls
+configure_tls
 
 set_nss_stuff
 
