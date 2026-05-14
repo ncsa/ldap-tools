@@ -36,14 +36,31 @@ configure_krb_auth() {
 }
 
 
+set_krb5_keytab_perms() {
+  KEYTAB=/etc/krb5.keytab
+  chgrp dirsrv "${KEYTAB}"
+  chmod 0640 "${KEYTAB}"
+}
+
+
+pamd_fixup() {
+  PAMD_LDAP=/etc/pam.d/ldapserver
+  [[ -f "${PAMD_LDAP}" ]] \
+  && sed -e 's/no_user_check/no_ccache/' "${PAMD_LDAP}"
+}
+
+
 ###
 # MAIN
 ###
 
 configure_memberof
 
-[[ $PAM_AUTH -eq $YES ]] \
-  && configure_krb_auth
+if [[ $PAM_AUTH -eq $YES ]] ; then
+  configure_krb_auth
+  set_krb5_keytab_perms
+  pamd_fixup
+fi
 
 
 # TODO - configure access logging for once per day

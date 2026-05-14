@@ -54,6 +54,27 @@ POST_LOG_DIR="${DS_LOG_DIR}"/post_processed_logs
 TODAY=$( date +%Y%m%d )
 
 
+ask_yes_no() {
+  # Ask Yes or No
+  # First option is Yes
+  # Use this when the most common answer is yes,
+  # ... enables the user to respond "1" for most installs
+  local rv msg
+  rv=1
+  msg="Is this ok?"
+  [[ -n "$1" ]] && msg="$1"
+  echo "$msg"
+  select yn in "Yes" "No"; do
+    case $yn in
+      Yes) rv=0;;
+      No ) rv=1;;
+    esac
+    break
+  done
+  return $rv
+}
+
+
 continue_or_exit() {
     local msg="Continue?"
     [[ -n "$1" ]] && msg="$1"
