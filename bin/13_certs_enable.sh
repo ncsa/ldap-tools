@@ -56,6 +56,6 @@ configure_tls
 
 set_nss_stuff
 
-# disable_plain_text_port
+disable_plain_text_port
 
 ldap_restart

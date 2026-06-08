@@ -96,8 +96,8 @@ validate_cn() {
 validate_port() {
   if [[ ${REPL_PORT_IS_VALID} -eq ${NO} ]] ; then
     # If not set, default to 636
-    [[ -z "${#REPL_PORT}" ]] && REPL_PORT=636
-    if [[ "${#REPL_PORT}" == "636" ]] || [[ "${#REPL_PORT}" == "389" ]] ; then
+    [[ -z "${REPL_PORT}" ]] && REPL_PORT=636
+    if [[ "${REPL_PORT}" == "636" ]] || [[ "${REPL_PORT}" == "389" ]] ; then
       : pass
     else
       LAST_ERR_MSG="invalid PORT '${LDAP_PORT}', must be 389 or 636"
@@ -187,7 +187,8 @@ ${PRG} [OPTIONS] <ACTION>
     -h | --help
     --cn <CN>      the cn of an existing replication agreement
     --host <FQDN>  the fqdn of the host whose replication agreement is to be affected
-    --pwd <PWD>    replication manager password (as defined on HOST)
+    --pwd  <PWD>   replication manager password (as defined on HOST)
+    --port <PORT>  replication port (defaults to 636)
 
   ACTIONS
       add, delete, pause, resume, init
