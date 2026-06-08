@@ -21,7 +21,11 @@ get_cert() {
   | openssl s_client \
       -servername "${HOST}" \
       -connect "${HOST}":636 2>/dev/null \
-  | openssl x509 -noout -subject -issuer -dates
+  | tee \
+    >(openssl x509 -noout -subject -issuer -dates) \
+    >(openssl x509 -noout -ext subjectAltName) \
+    >/dev/null \
+  | cat
 
 }
 

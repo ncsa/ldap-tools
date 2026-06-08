@@ -46,7 +46,7 @@ set_krb5_keytab_perms() {
 pamd_fixup() {
   PAMD_LDAP=/etc/pam.d/ldapserver
   [[ -f "${PAMD_LDAP}" ]] \
-  && sed -e 's/no_user_check/no_ccache/' "${PAMD_LDAP}"
+  && sed -i -e 's/no_user_check/no_ccache/' "${PAMD_LDAP}"
 }
 
 

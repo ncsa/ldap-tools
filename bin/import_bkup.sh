@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-INSTALL_DIR='/root/ldap-tools'
+INSTALL_DIR='___INSTALL_DIR___'
 . "${INSTALL_DIR}"/lib/ds_lib.sh
 
 SLAPD_DIR=/var/lib/dirsrv/slapd-"${DS_INSTANCE_NAME}"/ldif

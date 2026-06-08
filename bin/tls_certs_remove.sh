@@ -9,14 +9,16 @@ JQ="${INSTALL_DIR}"/bin/jq
 get_certnames() {
   [[ $DEBUG -eq $YES ]] && set -x
   _dsconf -j security certificate list \
-  | jq '.[].attrs.nickname'
+  | "${JQ}" '.[].attrs.nickname' \
+  | tr -d '"'
 }
 
 
 get_ca_certnames() {
   [[ $DEBUG -eq $YES ]] && set -x
   _dsconf -j security ca-certificate list \
-  | jq '.[].attrs.nickname'
+  | "${JQ}" '.[].attrs.nickname' \
+  | tr -d '"'
 }
 
 
@@ -43,11 +45,11 @@ delete_ca_cert() {
 ###
 [[ $DEBUG -eq $YES ]] && set -x
 
-readarray -t certnames < <( $( get_certnames ) )
-
-readarray -t ca_certnames < <( $( get_ca_certnames) )
-
+#get_certnames | readarray -t certnames
+readarray -t certnames < <( get_certnames )
 echo "Found host certs: ${certnames[@]}"
+
+readarray -t ca_certnames < <( get_ca_certnames)
 echo "Found CA certs: ${ca_certnames[@]}"
 
 for cname in "${certnames[@]}"; do

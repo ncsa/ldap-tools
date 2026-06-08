@@ -6,8 +6,6 @@
 INSTALL_DIR='___INSTALL_DIR___'
 . "${INSTALL_DIR}"/lib/ds_lib.sh
 
-JQ="${INSTALL_DIR}"/bin/jq
-
 
 get_filename() {
   local -n _varname
@@ -37,8 +35,23 @@ get_subject_cn() {
 }
 
 
+get_host_cert_filenames() {
+  unset HOST_CERT HOST_KEY
+  ask_yes_no "Install Host cert and Key ?" && {
+    for varname in HOST_CERT HOST_KEY ; do
+      while [[ -z "${!varname}" ]]; do
+        get_filename "${varname}" "Path to ${varname}"
+      done
+    done
+  }
+  #return true if CERT and KEY both have data
+  [[ -n "${HOST_CERT}"  && -n "${HOST_KEY}" ]]
+}
+
+
 get_ca_filenames() {
-  echo "Add one or more CA cert files ..."
+  unset CA_CERTS CA_NAMES
+  echo "Add one or more CA certs?"
   select choice in "Add CA file" "Done"; do
     case "${choice}" in
       "Add CA file")
@@ -55,12 +68,17 @@ get_ca_filenames() {
     esac
     echo "Add another? (press Enter to see choices again)"
   done
+  [[ -n "${CA_CERTS}" ]] #return true if CA_CERTS has data
 }
 
 
 # If you created the private key using an external utility,
 # import the server certificate and the private key:
 install_cert_and_key() {
+  echo "About to install ..."
+  echo "HOST_CERT: ${HOST_CERT}"
+  echo "HOST_KEY: ${HOST_KEY}"
+  ask_yes_no "Continue?" || return 0 #short circuit exit if user said no
   [[ $DEBUG -eq $YES ]] && set -x
   _dsctl \
     tls import-server-key-cert \
@@ -69,8 +87,23 @@ install_cert_and_key() {
 }
 
 
+install_ca_certs() {
+  i=0
+  for fn in "${CA_CERTS[@]}" ; do
+    CA_CERT="${fn}"
+    CA_NAME="${CA_NAMES[$i]}"
+    install_ca_cert
+    let "i=$i+1"
+  done
+}
+
+
 install_ca_cert() {
   # Import the CA certificate to the NSS database:
+  echo "About to install ..."
+  echo "CA_CERT: ${CA_CERT}"
+  echo "CA_NAME: ${CA_NAME}"
+  ask_yes_no "Continue?" || return 0 #short circuit exit if user said no
   [[ $DEBUG -eq $YES ]] && set -x
   _dsconf \
     security ca-certificate add \
@@ -85,9 +118,8 @@ install_ca_cert() {
 }
 
 
-restart_ldap() {
-  [[ $DEBUG -eq $YES ]] && set -x
-  _dsctl restart
+enable_certs() {
+  "${INSTALL_DIR}"/bin/13_certs_enable.sh
 }
 
 
@@ -95,34 +127,10 @@ restart_ldap() {
 # MAIN
 ###
 
-unset HOST_CERT HOST_KEY CA_CERT CA_NAME
-# for varname in HOST_CERT HOST_KEY ; do
-#   while [[ -z "${!varname}" ]]; do
-#     get_filename "${varname}" "Path to ${varname}"
-#   done
-# done
+get_host_cert_filenames \
+&& install_cert_and_key
 
-get_ca_filenames
+get_ca_filenames \
+&& install_ca_certs
 
-echo "About to install ..."
-echo "HOST_CERT: ${HOST_CERT}"
-echo "HOST_KEY: ${HOST_KEY}"
-i=0
-for fn in "${CA_CERTS[@]}" ; do
-  echo "CA_cert: '${fn}'"
-  echo "CA_name: '${CA_NAMES[$i]}'"
-  let "i=$i+1"
-done
-continue_or_exit
-
-install_cert_and_key
-
-i=0
-for fn in "${CA_CERTS[@]}" ; do
-  CA_CERT="'${fn}'"
-  CA_NAME="'${CA_NAMES[$i]}'"
-  install_ca_cert
-  let "i=$i+1"
-done
-
-restart_ldap
+enable_certs
