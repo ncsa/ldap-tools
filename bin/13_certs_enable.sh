@@ -34,11 +34,21 @@ set_nss_stuff() {
     --nss-cert-name 'Server-Cert'
 }
 
+
 # Disable plain text LDAP port
 disable_plain_text_port() {
-  _dsconf \
-    security disable_plain_port
-    
+  cat <<ENDHERE | /usr/bin/expect -f - || die 'problem during disable_389'
+  spawn ${INSTALL_DIR}/bin/dsconf security disable_plain_port
+  expect "Type 'Yes I am sure' to continue: "
+  send -- "Yes I am sure\n"
+  expect {
+    "Plaintext port disabled - please restart your instance to take effect" {
+    }
+    timeout {
+      exit 1
+    }
+  }
+ENDHERE
 }
 
 

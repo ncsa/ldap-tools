@@ -10,12 +10,23 @@
    1. `04_custom_schema.sh`
 1. Build log monitoring tools
    1. `05_log_monitoring.sh`
-1. Configure certificates via certbot
-   1. `10_certs_create.sh`
-   1. `11_certs_mk_hookfiles.sh`
-   1. `12_certs_install.sh`
-   1. `13_certs_enable.sh`
-   1. `14_certs_verify.sh`
+1. Install TLS Certificates (choose only one of two options)
+    1. Certs Option #1: Configure certificates via certbot
+       1. `10_certs_create.sh`
+       1. `11_certs_mk_hookfiles.sh`
+       1. `12_certs_install.sh`
+       1. `13_certs_enable.sh`
+       1. `14_certs_verify.sh`
+    1. Certs Option #2: Install manual certs
+       1. `mkdir /root/ldap_certs`
+       1. Copy the certificate, key, ca_certs into the dir above.
+       1. Certificate filename must end with `.cert`
+       1. Key filename must end with `.key`
+       1. CA cert filenames must start with `signing_authority`
+       1. `tls_certs_install.sh`
+       1. NOTE: If prefer to install each part interactively:
+          1. `tls_certs_install.sh --prompt`
+       1. `14_certs_verify.sh`
 1. Configure this ldap server as a Supplier, a Hub, or a Consumer. Do only one
    of these!
    * `20_mk_consumer.sh`
