@@ -28,7 +28,7 @@ files_remain() {
 rm_old_files() {
   # blindly delete all files older than MAX_AGE
   [[ $DEBUG -eq $YES ]] && set -x
-  find "${POST_LOG_DIR}"/ -type f -mtime "${MAX_AGE}" -delete
+  find "${POST_LOG_DIR}"/ -type f -mtime +"${MAX_AGE}" -delete
 }
 
 

@@ -1,18 +1,19 @@
 #!/bin/bash
 
-TS=$( date +%Y%m%d_%H%M%S )
-WORK_DIR=/usr/local/crashplan/cache/ldifs
-LDIF_PATH="${WORK_DIR}"/"${TS}".ldif
-DIFF_PATH="${WORK_DIR}"/"${TS}".diff
-EMAIL_TO=aloftus@illinois.edu
-EMAIL_SUBJECT="ldap ldif diff ${TS}"
-DB2LDIF=/sbin/db2ldif
-
-
 YES=0
 NO=1
 DEBUG=$NO
 # DEBUG=$YES
+
+TS=$( date +%Y%m%dT%H%M%S )
+WORK_DIR=/usr/local/crashplan/cache/ldifs
+BKUP_PATH="${WORK_DIR}"/"${TS}".ldif
+DIFF_PATH= # defined in diff_last_2_backups()
+EMAIL_TO=aloftus@illinois.edu
+EMAIL_SUBJECT="ldap bkup diff"
+DB2LDIF=/sbin/db2ldif
+OK_TO_SEND_MAIL=$NO
+
 
 # ANSI escape codes for colors
 GREEN='\033[0;32m'
@@ -51,35 +52,54 @@ debug() {
 }
 
 
-mk_ldif() {
+mk_backup() {
   [[ $DEBUG -eq $YES ]] && set -x
-  "${DB2LDIF}" -q -s "dc=ncsa,dc=illinois,dc=edu" -a "${LDIF_PATH}"
-  [[ -f "${LDIF_PATH}" ]] || die "failed to make ldif '${LDIF_PATH}'"
-  gzip -9 "${LDIF_PATH}"
-  [[ -f "${LDIF_PATH}".gz ]] || die "failed to find ldif gzip '${LDIF_PATH}.gz'"
+  local _err_path _err_line_count
+  _err_path=$( mktemp )
+  "${DB2LDIF}" -s "dc=ncsa,dc=illinois,dc=edu" -a "${BKUP_PATH}" 1>/dev/null 2>"${_err_path}"
+  [[ -f "${BKUP_PATH}" ]] || die "failed to make ldif '${BKUP_PATH}'"
+  _err_line_count=$( wc -l "${_err_path}" | cut -d' ' -f1 )
+  if [[ ${_err_line_count} -gt 3 ]] ; then
+    cat "${_err_path}"
+    rm "${_err_path}"
+    die 'Error while making backup'
+  fi
+  rm "${_err_path}"
+  gzip -9 "${BKUP_PATH}"
+  [[ -f "${BKUP_PATH}".gz ]] || die "failed to find ldif gzip '${BKUP_PATH}.gz'"
 }
 
 
-mk_diff() {
+diff_last_2_backups() {
   [[ $DEBUG -eq $YES ]] && set -x
   # diff the two most recent files
-  zdiff -u $( ls -tr "${WORK_DIR}"/*.ldif.gz | tail -n 2 ) > "${DIFF_PATH}"
+  local _src_files _start_ts _end_ts
+  _src_files=( $( ls -tr "${WORK_DIR}"/*.ldif.gz | tail -n 2 ) )
+  _start_ts=$( basename "${_src_files[0]}" .ldif.gz )
+  _end_ts=$( basename "${_src_files[1]}" .ldif.gz )
+  DIFF_PATH="${_start_ts}"-"${_end_ts}".diff
+  zdiff -u "${_src_files[@]}" > "${DIFF_PATH}"
   [[ -f "${DIFF_PATH}" ]] || die "Failed to make diff file '${DIFF_PATH}'"
   gzip -9 "${DIFF_PATH}"
-  [[ -f "${DIFF_PATH}".gz ]] || die "failed to make diff gzip '${DIFF_PATH}.gz'"
+  DIFF_PATH="${DIFF_PATH}".gz
+  [[ -f "${DIFF_PATH}" ]] || die "failed to make diff gzip '${DIFF_PATH}'"
 }
 
 
 mail_diff() {
-  cat <<ENDHERE | mailx -a "${DIFF_PATH}".gz -s "${EMAIL_SUBJECT}" "${EMAIL_TO}"
-(contents attached)
+  [[ $DEBUG -eq $YES ]] && set -x
+  [[ $OK_TO_SEND_MAIL -eq $YES ]] || return 0 #exit here if not sending mail
+  local _diff_fn _diff_name
+  _diff_fn=$( basename "${DIFF_PATH}" )
+  _diff_name=$( echo "${_diff_fn}" | cut -d. -f1 )
+  cat <<ENDHERE | mailx -a "${DIFF_PATH}" -s "${EMAIL_SUBJECT} ${_diff_name}" "${EMAIL_TO}"
+file attached ${_diff_fn}
 ENDHERE
 }
 
 
 cleanup() {
   [[ $DEBUG -eq $YES ]] && set -x
-  # gzip -9 "${DIFF_PATH}"
   find "${WORK_DIR}" -maxdepth 1 -type f -mtime +2
 }
 
@@ -88,10 +108,10 @@ cleanup() {
 # MAIN
 ###
 
-mk_ldif
+mk_backup
 
-mk_diff
+diff_last_2_backups
 
 mail_diff
 
-# cleanup
+cleanup
