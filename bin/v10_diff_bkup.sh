@@ -6,6 +6,7 @@ LDIF_PATH="${WORK_DIR}"/"${TS}".ldif
 DIFF_PATH="${WORK_DIR}"/"${TS}".diff
 EMAIL_TO=aloftus@illinois.edu
 EMAIL_SUBJECT="ldap ldif diff ${TS}"
+DB2LDIF=/sbin/db2ldif
 
 
 YES=0
@@ -52,7 +53,7 @@ debug() {
 
 mk_ldif() {
   [[ $DEBUG -eq $YES ]] && set -x
-  db2ldif -q -s "dc=ncsa,dc=illinois,dc=edu" -a "${LDIF_PATH}"
+  "${DB2LDIF}" -q -s "dc=ncsa,dc=illinois,dc=edu" -a "${LDIF_PATH}"
   [[ -f "${LDIF_PATH}" ]] || die "failed to make ldif '${LDIF_PATH}'"
   gzip -9 "${LDIF_PATH}"
   [[ -f "${LDIF_PATH}".gz ]] || die "failed to find ldif gzip '${LDIF_PATH}.gz'"
@@ -86,8 +87,6 @@ cleanup() {
 ###
 # MAIN
 ###
-
-get_prev_ldif
 
 mk_ldif
 
