@@ -17,7 +17,7 @@
        1. `12_certs_install.sh`
        1. `13_certs_enable.sh`
        1. `14_certs_verify.sh`
-    1. Certs Option #2: Install manual certs
+    1. Certs Option #2: Install manual certs from asd-prov01:/root/ldap/ldap_certs/push_certs_to_host.sh isf-ldap-12
        1. `mkdir /root/ldap_certs`
        1. Copy the certificate, key, ca_certs into the dir above.
        1. Certificate filename must end with `.cert`
