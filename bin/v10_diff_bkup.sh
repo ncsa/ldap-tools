@@ -77,7 +77,7 @@ diff_last_2_backups() {
   _src_files=( $( ls -tr "${WORK_DIR}"/*.ldif.gz | tail -n 2 ) )
   _start_ts=$( basename "${_src_files[0]}" .ldif.gz )
   _end_ts=$( basename "${_src_files[1]}" .ldif.gz )
-  DIFF_PATH="${_start_ts}"-"${_end_ts}".diff
+  DIFF_PATH="${WORK_DIR}/"${_start_ts}"-"${_end_ts}".diff
   zdiff -u "${_src_files[@]}" > "${DIFF_PATH}"
   [[ -f "${DIFF_PATH}" ]] || die "Failed to make diff file '${DIFF_PATH}'"
   gzip -9 "${DIFF_PATH}"
