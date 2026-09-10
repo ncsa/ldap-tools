@@ -5,8 +5,6 @@ INSTALL_DIR='___INSTALL_DIR___'
 . "${INSTALL_DIR}"/lib/ds_lib.sh
 
 PRG=$( basename "$0" )
-YES=0
-NO=1
 
 
 get_ds_version() {

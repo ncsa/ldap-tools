@@ -47,13 +47,7 @@ install_lap() {
 
 
 install_jq() {
-  local _url _outfile
-  _url=https://github.com/jqlang/jq/releases/download/jq-1.8.1/jq-linux-amd64
-  _outfile="${INSTALL_DIR}"/bin/jq
-  if [[ ! -f "${_outfile}" ]] ; then
-    curl -L -o "${_outfile}" "${_url}"
-    chmod +x "${_outfile}"
-  fi
+  "${INSTALL_DIR}"/bin/install_jq.sh
 }
 
 
@@ -104,7 +98,7 @@ install_hourly_crons() {
   local _crondir _cron_files _fn _hour _min _cmd
   _crondir="${INSTALL_DIR}"/cron
   _cron_files=( $( find "${_crondir}" \
-    -mindepth 1 -maxdepth 1 -type f -executable -regextype posix-egrep
+    -mindepth 1 -maxdepth 1 -type f -executable -regextype posix-egrep \
       -regex '.+/[0-9]{4}_.+\.sh$'
   ) )
   for i in "${!_cron_files[@]}"; do

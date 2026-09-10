@@ -18,11 +18,11 @@ LDAP_TOOLS_CONFIG="${INSTALL_DIR}"/conf/config
 . "${LDAP_TOOLS_CONFIG}"
 
 # 389ds settings
-DS_SERVER_INF=/root/.config/ldap/"${DS_INSTANCE_NAME}"/"${DS_INSTANCE_NAME}".inf
+DS_SERVER_INF="${HOME}"/.config/ldap/"${DS_INSTANCE_NAME}"/"${DS_INSTANCE_NAME}".inf
 DS_LIB_DIR=/var/lib/dirsrv/slapd-"${DS_INSTANCE_NAME}"
 DS_LDIF_DIR=/var/lib/dirsrv/slapd-"${DS_INSTANCE_NAME}"/ldif
 DSE_LDIF_FILE=/etc/dirsrv/slapd-"${DS_INSTANCE_NAME}"/dse.ldif
-DNPW_FN=/root/.config/ldap/"${DS_INSTANCE_NAME}"/dnpw
+DNPW_FN="${HOME}"/.config/ldap/"${DS_INSTANCE_NAME}"/dnpw
 LDAPI="ldapi://%2frun%2fslapd-${DS_INSTANCE_NAME}".socket
 PAM_AUTH_FN='/etc/pam.d/ldapserver'
 
@@ -37,7 +37,7 @@ CERT_DIR="${LETSENCRYPT_BASE}"/live/"${HOST}"
 HOST_KEY="${CERT_DIR}"/privkey.pem
 HOST_CERT="${CERT_DIR}"/cert.pem
 CA_CERT="${CERT_DIR}"/chain.pem
-CA_NAME="LetsEncrypt CA"
+CA_NAME="CA-Chain"
 
 # host command paths
 DSCONF=/usr/sbin/dsconf
@@ -46,7 +46,7 @@ LDAPSEARCH=/usr/bin/ldapsearch
 LDAPMODIFY=/usr/bin/ldapmodify
 
 # replication settings
-REPL_PW_FN=/root/.config/ldap/"${DS_INSTANCE_NAME}"/replpw
+REPL_PW_FN="${HOME}"/.config/ldap/"${DS_INSTANCE_NAME}"/replpw
 REPL_DN='cn=replication manager,cn=config'
 
 # custom cronjob related vars
@@ -142,37 +142,6 @@ _ldapmodify() {
     -H "${LDAPI}" \
     -Y EXTERNAL
 }
-
-
-mk_passwd() {
-  tr -dc A-Za-z0-9 </dev/urandom | head -c 50
-}
-
-
-
-
-# on first run, make passwds
-[[ -f "${DNPW_FN}" ]] || {
-  pw_dir="$( dirname ${DNPW_FN} )"
-  mkdir -p "${pw_dir}"
-  pwd_val=$(mk_passwd)
-  printf "${pwd_val}" >"${DNPW_FN}" #ensure there is no newline char
-  chmod 400 "${DNPW_FN}"
-}
-
-
-[[ -f "${REPL_PW_FN}" ]] || {
-  pw_dir="$( dirname ${REPL_PW_FN} )"
-  mkdir -p "${pw_dir}"
-  pwd_val=$(mk_passwd)
-  printf "${pwd_val}" >"${REPL_PW_FN}" #ensure there is no newline char
-  chmod 400 "${REPL_PW_FN}"
-}
-
-
-
-
-
 
 
 validate_file() {
@@ -274,4 +243,28 @@ get_json_logs() {
 
     echo "${infile}" >>"${_outfn}"
   done
+}
+
+
+mk_passwd() {
+  tr -dc A-Za-z0-9 </dev/urandom | head -c 50
+}
+
+
+# on first run, make passwds
+[[ -f "${DNPW_FN}" ]] || {
+  pw_dir="$( dirname ${DNPW_FN} )"
+  mkdir -p "${pw_dir}"
+  pwd_val=$(mk_passwd)
+  printf "${pwd_val}" >"${DNPW_FN}" #ensure there is no newline char
+  chmod 400 "${DNPW_FN}"
+}
+
+
+[[ -f "${REPL_PW_FN}" ]] || {
+  pw_dir="$( dirname ${REPL_PW_FN} )"
+  mkdir -p "${pw_dir}"
+  pwd_val=$(mk_passwd)
+  printf "${pwd_val}" >"${REPL_PW_FN}" #ensure there is no newline char
+  chmod 400 "${REPL_PW_FN}"
 }

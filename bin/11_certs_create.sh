@@ -4,55 +4,33 @@ INSTALL_DIR='___INSTALL_DIR___'
 . "${INSTALL_DIR}"/lib/ds_lib.sh
 
 HOOK_DIR="${LETSENCRYPT_BASE}"/renewal-hooks
-PRE_DIR="${HOOK_DIR}"/pre
-PRE_HOOK="${PRE_DIR}"/01_open_firewall_port_80.sh
-POST_DIR="${HOOK_DIR}"/post
-POST_HOOK="${POST_DIR}"/99_close_firewall_port_80.sh
 TEST=$YES
 
-# Get certs
 
-## Setup pre-hook script
-setup_pre_hook() {
-  echo
-  echo "Setup pre-hook"
-  [[ -d "${PRE_DIR}" ]] || {
-    echo "making pre-hook dir"
-    mkdir -p "${PRE_DIR}"
-  }
-  [[ -f "${PRE_HOOK}" ]] || {
-    echo "pre-hook file not found, creating it"
-    cat <<ENDHERE > "${PRE_HOOK}"
-/usr/sbin/iptables -I INPUT -p tcp -m multiport --dports 80 -j ACCEPT
-ENDHERE
-  }
-  [[ -x "${PRE_HOOK}" ]] || {
-    echo "setting pre-hook perms"
-    chmod +x "${PRE_HOOK}"
-  }
-  echo "OK"
+mk_pre_hooks() {
+  # certbot <3.2 does not automatically run pre & post hooks in HOOK_DIR
+  # for any command other than renew
+  # so make cmdline options here for use with other certbot commands
+  find "${HOOK_DIR}"/pre -type f \
+  | sort \
+  | while read; do
+      echo "--pre-hook '${REPLY}'"
+    done
 }
 
-## Setup post-hook script
-setup_post_hook() {
-  echo
-  echo "Setup post-hook"
-  [[ -d "${POST_DIR}" ]] || {
-    echo "making pre-hook dir"
-    mkdir -p "${POST_DIR}"
-  }
-  [[ -f "${POST_HOOK}" ]] || {
-    echo "post-hook file not found, creating it"
-    cat <<ENDHERE > "${POST_HOOK}"
-/usr/sbin/iptables -D INPUT -p tcp -m multiport --dports 80 -j ACCEPT
-ENDHERE
-  }
-  [[ -x "${POST_HOOK}" ]] || {
-    echo "setting post-hook perms"
-    chmod +x "${POST_HOOK}"
-  }
-  echo "OK"
+
+mk_post_hooks() {
+  # certbot <3.2 does not automatically run pre & post hooks in HOOK_DIR
+  # for any command other than renew
+  # so make cmdline options here for use with other certbot commands
+  find "${HOOK_DIR}"/post -type f \
+  | sort \
+  | while read; do
+      echo "--post-hook '${REPLY}'"
+    done
 }
+
+
 
 ## Add email to top config
 set_email() {
@@ -130,10 +108,9 @@ get_cert() {
     --verbose \
     --cert-name "${HOST}" \
     -d "${_domains}" \
-    --pre-hook "${PRE_HOOK}" \
-    --post-hook "${POST_HOOK}" \
     "${_test_opts[@]}" \
-    "${_certbot_extra_opts[@]}" \
+    $(mk_pre_hooks) \
+    $(mk_post_hooks) \
   ;
   set +x
 }
@@ -153,10 +130,6 @@ enable_certbot_renewals() {
 certbot_extra_options=()
 [[ "$1" == "force" ]] && certbot_extra_options+='--force-renewal'
 [[ "$1" == "expand" ]] && certbot_extra_options+='--expand'
-
-setup_pre_hook
-
-setup_post_hook
 
 set_email
 
