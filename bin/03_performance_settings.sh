@@ -4,7 +4,7 @@ INSTALL_DIR='___INSTALL_DIR___'
 . "${INSTALL_DIR}"/lib/ds_lib.sh
 
 declare -A BACKEND_CONFIG_SETTINGS=(
-  [lookthroughlimit]=5001 # default 5000, set -1 to disable?
+  [lookthroughlimit]=-1 # default 5000, set -1 to disable?
 )
 
 declare -A BACKEND_SUFFIX_SETTINGS=(

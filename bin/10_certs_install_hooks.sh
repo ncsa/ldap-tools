@@ -18,12 +18,10 @@ install_certbot_renewal_hook_files() {
   | while read; do
     _tgt_fn="${REPLY:${_base_len}}"
     _tgt_dir=$( dirname "${_tgt_fn}" )
-    mkdir -p "${_tgt_dir}"
     install \
       -D \
       --compare \
       --verbose \
-      --suffix="${TS}" \
       --mode=0755 \
       -t "${_tgt_dir}" \
       "${REPLY}"
