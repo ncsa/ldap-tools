@@ -38,7 +38,7 @@ for fn in $( get_json_files ); do
   ACCESS_DATE=$( basename "${fn}" | cut -c 8-15 | xargs -r -I{} date -d {} '+%Y-%m-%d' )
   get_client_access_data "${fn}" \
   | while read count ip; do
-      client=$(dig -x $ip +short);
+      client=$(dig -x $ip +short | head -1 | sed -e 's/\.$//');
       echo "${ACCESS_DATE},${HOST},${client},${ip},,,${count}"
   done
 done
