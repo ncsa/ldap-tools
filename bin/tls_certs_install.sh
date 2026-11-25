@@ -154,7 +154,7 @@ install_ca_cert() {
 
 
 enable_certs() {
-  "${INSTALL_DIR}"/bin/13_certs_enable.sh
+  "${INSTALL_DIR}"/bin/12_certs_enable.sh
 }
 
 
