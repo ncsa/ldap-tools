@@ -158,6 +158,15 @@ enable_certs() {
 }
 
 
+assert_no_current_certs() {
+  local _linecount
+  _linecount=$( ${INSTALL_DIR}/bin/tls_certs_list.sh | wc -l )
+  if [[ "${_linecount}" -ne 0 ]] ; then
+    die 'Existing certs in ds389 must be removed before installing new certs.'
+  fi
+}
+
+
 print_usage() {
   echo "${PRG} - install manual certificates and chain"
   echo "SYNOPSIS:"
@@ -185,6 +194,9 @@ while [[ $# -gt 0 ]] && [[ $ENDWHILE -eq 0 ]] ; do
   esac
   shift
 done
+
+# Ensure any old certs have been removed
+assert_no_current_certs
 
 get_host_cert_filenames \
 && install_cert_and_key
